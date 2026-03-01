@@ -18,9 +18,10 @@ import NewApplicationPage from "./pages/NewApplicationPage";
 import TransactionsNewPage from "./pages/TransactionsNewPage";
 import TransactionsListPage from "./pages/TransactionsListPage";
 import TransactionDetailPage from "./pages/TransactionDetailPage";
+import VaultPage from "./pages/VaultPage";
+import OpeningBalanceImportPage from "./pages/OpeningBalanceImportPage";
 import {
   TransactionsPipelinePage,
-  VaultPage,
   VouchersPage,
   DayBookPage,
   LedgerPage,
@@ -62,6 +63,7 @@ const App = () => (
             <Route path="/transactions/new" element={<TransactionsNewPage />} />
             <Route path="/transactions/:id" element={<TransactionDetailPage />} />
             <Route path="/transactions/pipeline" element={<TransactionsPipelinePage />} />
+            <Route path="/transactions/import" element={<OpeningBalanceImportPage />} />
             <Route path="/transactions/los" element={<LOSPipelinePage />} />
             <Route path="/transactions/los/new" element={<NewApplicationPage />} />
             <Route path="/vault" element={<VaultPage />} />
