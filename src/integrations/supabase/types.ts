@@ -487,6 +487,159 @@ export type Database = {
           },
         ]
       }
+      collection_interactions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          disposition: string | null
+          id: string
+          interaction_type: string
+          loan_id: string
+          next_followup: string | null
+          notes: string | null
+          ptp_amount: number | null
+          ptp_date: string | null
+          task_id: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          disposition?: string | null
+          id?: string
+          interaction_type?: string
+          loan_id: string
+          next_followup?: string | null
+          notes?: string | null
+          ptp_amount?: number | null
+          ptp_date?: string | null
+          task_id: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          disposition?: string | null
+          id?: string
+          interaction_type?: string
+          loan_id?: string
+          next_followup?: string | null
+          notes?: string | null
+          ptp_amount?: number | null
+          ptp_date?: string | null
+          task_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_interactions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_interactions_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_interactions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "collection_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_interactions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collection_tasks: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          customer_id: string
+          disposition: string | null
+          dpd: number
+          id: string
+          loan_id: string
+          next_followup: string | null
+          notes: string | null
+          ptp_amount: number | null
+          ptp_date: string | null
+          status: string
+          task_type: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          customer_id: string
+          disposition?: string | null
+          dpd?: number
+          id?: string
+          loan_id: string
+          next_followup?: string | null
+          notes?: string | null
+          ptp_amount?: number | null
+          ptp_date?: string | null
+          status?: string
+          task_type?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          customer_id?: string
+          disposition?: string | null
+          dpd?: number
+          id?: string
+          loan_id?: string
+          next_followup?: string | null
+          notes?: string | null
+          ptp_amount?: number | null
+          ptp_date?: string | null
+          status?: string
+          task_type?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_tasks_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_tasks_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_tasks_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cron_runs: {
         Row: {
           charges_accrued: number
@@ -1357,6 +1510,124 @@ export type Database = {
           },
         ]
       }
+      notification_log: {
+        Row: {
+          channel: string
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          id: string
+          loan_id: string | null
+          message: string | null
+          sent_at: string | null
+          status: string
+          template: string | null
+          tenant_id: string
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          id?: string
+          loan_id?: string | null
+          message?: string | null
+          sent_at?: string | null
+          status?: string
+          template?: string | null
+          tenant_id: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          id?: string
+          loan_id?: string | null
+          message?: string | null
+          sent_at?: string | null
+          status?: string
+          template?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_log_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_log_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      npa_classifications: {
+        Row: {
+          classification: string
+          classified_at: string
+          created_at: string
+          dpd: number
+          id: string
+          loan_id: string
+          previous_classification: string | null
+          provision_amount: number
+          provision_rate: number
+          tenant_id: string
+        }
+        Insert: {
+          classification?: string
+          classified_at?: string
+          created_at?: string
+          dpd?: number
+          id?: string
+          loan_id: string
+          previous_classification?: string | null
+          provision_amount?: number
+          provision_rate?: number
+          tenant_id: string
+        }
+        Update: {
+          classification?: string
+          classified_at?: string
+          created_at?: string
+          dpd?: number
+          id?: string
+          loan_id?: string
+          previous_classification?: string | null
+          provision_amount?: number
+          provision_rate?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "npa_classifications_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "npa_classifications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pledge_items: {
         Row: {
           created_at: string
@@ -1792,6 +2063,59 @@ export type Database = {
           },
           {
             foreignKeyName: "repledges_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheduled_reports: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          filters: Json | null
+          format: string
+          frequency: string
+          id: string
+          is_active: boolean
+          last_run_at: string | null
+          recipients: string[]
+          report_type: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          filters?: Json | null
+          format?: string
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          recipients?: string[]
+          report_type: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          filters?: Json | null
+          format?: string
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          recipients?: string[]
+          report_type?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_reports_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"

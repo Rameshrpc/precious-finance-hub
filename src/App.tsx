@@ -31,10 +31,13 @@ import BalanceSheetPage from "./pages/BalanceSheetPage";
 import DayBookPage from "./pages/DayBookPage";
 import LedgerPage from "./pages/LedgerPage";
 import TrialBalancePage from "./pages/TrialBalancePage";
+import ReportsHubPage from "./pages/ReportsHubPage";
+import NPADashboardPage from "./pages/NPADashboardPage";
+import DPDTrackerPage from "./pages/DPDTrackerPage";
+import CollectionQueuePage from "./pages/CollectionQueuePage";
+import TelecallerPage from "./pages/TelecallerPage";
 import {
   TransactionsPipelinePage,
-  ReportsPage,
-  CollectionPage,
   WhatsAppInboxPage,
   TemplatesPage,
   SettingsPage,
@@ -82,9 +85,13 @@ const App = () => (
             <Route path="/accounting/trial-balance" element={<TrialBalancePage />} />
             <Route path="/accounting/pnl" element={<PnLPage />} />
             <Route path="/accounting/balance-sheet" element={<BalanceSheetPage />} />
-            <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/reports" element={<ReportsHubPage />} />
             <Route path="/approvals" element={<ApprovalsPage />} />
-            <Route path="/collection" element={<CollectionPage />} />
+            <Route path="/collection" element={<CollectionQueuePage />} />
+            <Route path="/collection/npa" element={<NPADashboardPage />} />
+            <Route path="/collection/dpd" element={<DPDTrackerPage />} />
+            <Route path="/collection/queue" element={<CollectionQueuePage />} />
+            <Route path="/collection/telecaller" element={<TelecallerPage />} />
             <Route path="/communications/whatsapp" element={<WhatsAppInboxPage />} />
             <Route path="/communications/templates" element={<TemplatesPage />} />
             <Route path="/settings" element={<SettingsPage />} />
