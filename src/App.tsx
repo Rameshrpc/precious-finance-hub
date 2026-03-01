@@ -11,8 +11,8 @@ import AppShell from "./components/AppShell";
 import DashboardHome from "./pages/DashboardHome";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
+import CustomersPage from "./pages/CustomersPage";
 import {
-  CustomersPage,
   TransactionsNewPage,
   TransactionsListPage,
   TransactionsPipelinePage,
