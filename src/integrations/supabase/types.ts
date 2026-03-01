@@ -868,6 +868,7 @@ export type Database = {
           description: string | null
           gross_weight: number
           id: string
+          is_released: boolean
           item_id: string | null
           item_name: string
           loan_id: string
@@ -878,6 +879,7 @@ export type Database = {
           purity_name: string | null
           purity_percentage: number
           rate_per_gram: number
+          released_at: string | null
           tenant_id: string
           value: number
         }
@@ -887,6 +889,7 @@ export type Database = {
           description?: string | null
           gross_weight?: number
           id?: string
+          is_released?: boolean
           item_id?: string | null
           item_name: string
           loan_id: string
@@ -897,6 +900,7 @@ export type Database = {
           purity_name?: string | null
           purity_percentage?: number
           rate_per_gram?: number
+          released_at?: string | null
           tenant_id: string
           value?: number
         }
@@ -906,6 +910,7 @@ export type Database = {
           description?: string | null
           gross_weight?: number
           id?: string
+          is_released?: boolean
           item_id?: string | null
           item_name?: string
           loan_id?: string
@@ -916,6 +921,7 @@ export type Database = {
           purity_name?: string | null
           purity_percentage?: number
           rate_per_gram?: number
+          released_at?: string | null
           tenant_id?: string
           value?: number
         }
@@ -1030,6 +1036,81 @@ export type Database = {
           },
         ]
       }
+      redemptions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          discount: number
+          id: string
+          items_released: Json | null
+          loan_id: string
+          notes: string | null
+          other_charges: number
+          partial_release: boolean
+          payment_mode: string
+          payment_reference: string | null
+          penalty: number
+          principal: number
+          redemption_number: string
+          tenant_id: string
+          total: number
+          unpaid_charges: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          discount?: number
+          id?: string
+          items_released?: Json | null
+          loan_id: string
+          notes?: string | null
+          other_charges?: number
+          partial_release?: boolean
+          payment_mode?: string
+          payment_reference?: string | null
+          penalty?: number
+          principal?: number
+          redemption_number: string
+          tenant_id: string
+          total?: number
+          unpaid_charges?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          discount?: number
+          id?: string
+          items_released?: Json | null
+          loan_id?: string
+          notes?: string | null
+          other_charges?: number
+          partial_release?: boolean
+          payment_mode?: string
+          payment_reference?: string | null
+          penalty?: number
+          principal?: number
+          redemption_number?: string
+          tenant_id?: string
+          total?: number
+          unpaid_charges?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redemptions_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "redemptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           created_at: string
@@ -1071,6 +1152,72 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      voucher_lines: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          credit_account: string
+          debit_account: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          loan_id: string | null
+          narration: string | null
+          tenant_id: string
+          voucher_date: string
+          voucher_number: string | null
+          voucher_type: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          credit_account: string
+          debit_account: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          loan_id?: string | null
+          narration?: string | null
+          tenant_id: string
+          voucher_date?: string
+          voucher_number?: string | null
+          voucher_type: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          credit_account?: string
+          debit_account?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          loan_id?: string | null
+          narration?: string | null
+          tenant_id?: string
+          voucher_date?: string
+          voucher_number?: string | null
+          voucher_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voucher_lines_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "voucher_lines_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLoanDetail } from "@/hooks/useLoans";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { formatINR, formatWeight, formatDate } from "@/lib/formatters";
 import { getLabel } from "@/lib/labels";
+import ChargeCollectionDialog from "@/components/ChargeCollectionDialog";
+import ClosureDialog from "@/components/ClosureDialog";
 import {
   ArrowLeft, IndianRupee, TrendingUp, Clock, FileText, Printer,
   RefreshCw, Download, CircleDot
@@ -45,6 +48,8 @@ export default function TransactionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { loan, loanLoading, pledgeItems, interestRecords, auditLogs, scheme } = useLoanDetail(id);
+  const [chargeDialogOpen, setChargeDialogOpen] = useState(false);
+  const [closureDialogOpen, setClosureDialogOpen] = useState(false);
 
   if (loanLoading) {
     return (
@@ -85,9 +90,13 @@ export default function TransactionDetailPage() {
           {getLabel(loan.product_type, "product")}
         </Badge>
         <div className="ml-auto flex gap-2 flex-wrap">
-          <Button size="sm" variant="outline" className="gap-1"><IndianRupee className="h-3.5 w-3.5" />Collect {getLabel(loan.product_type, "charge")}</Button>
+          <Button size="sm" variant="outline" className="gap-1" onClick={() => setChargeDialogOpen(true)} disabled={loan.status === "closed"}>
+            <IndianRupee className="h-3.5 w-3.5" />Collect {getLabel(loan.product_type, "charge")}
+          </Button>
           <Button size="sm" variant="outline" className="gap-1"><RefreshCw className="h-3.5 w-3.5" />Reloan</Button>
-          <Button size="sm" variant="destructive" className="gap-1">{getLabel(loan.product_type, "closeVerb")}</Button>
+          <Button size="sm" variant="destructive" className="gap-1" onClick={() => setClosureDialogOpen(true)} disabled={loan.status === "closed"}>
+            {getLabel(loan.product_type, "closeVerb")}
+          </Button>
           <Button size="sm" variant="outline" className="gap-1"><Printer className="h-3.5 w-3.5" />Print</Button>
         </div>
       </div>
@@ -335,6 +344,21 @@ export default function TransactionDetailPage() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Dialogs */}
+      <ChargeCollectionDialog
+        open={chargeDialogOpen}
+        onOpenChange={setChargeDialogOpen}
+        loan={loan}
+        interestRecords={interestRecords}
+      />
+      <ClosureDialog
+        open={closureDialogOpen}
+        onOpenChange={setClosureDialogOpen}
+        loan={loan}
+        pledgeItems={pledgeItems}
+        interestRecords={interestRecords}
+      />
     </div>
   );
 }
