@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -123,12 +124,12 @@ const Auth = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password">Password</Label>
-                    <button
-                      type="button"
+                    <Link
+                      to="/forgot-password"
                       className="text-xs font-medium text-gold hover:text-gold-light transition-colors"
                     >
                       Forgot Password?
-                    </button>
+                    </Link>
                   </div>
                   <Input
                     id="password"

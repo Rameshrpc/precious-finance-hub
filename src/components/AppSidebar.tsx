@@ -34,6 +34,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ROLE_LABELS } from "@/lib/indian-locale";
+import { canAccessPath } from "@/lib/role-access";
 import { useState } from "react";
 
 interface NavItem {
@@ -98,6 +99,19 @@ const AppSidebar = () => {
   };
 
   const primaryRole = roles[0] || "staff";
+
+  // Filter menu items by role access
+  const filteredItems = menuItems
+    .map((item) => {
+      if (item.children) {
+        const visibleChildren = item.children.filter((c) => canAccessPath(c.path, roles));
+        if (visibleChildren.length === 0) return null;
+        return { ...item, children: visibleChildren };
+      }
+      if (item.path && !canAccessPath(item.path, roles)) return null;
+      return item;
+    })
+    .filter(Boolean) as NavItem[];
   const initials = (profile?.full_name || "U")
     .split(" ")
     .map((n) => n[0])
@@ -220,7 +234,7 @@ const AppSidebar = () => {
 
       {/* Nav */}
       <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto scrollbar-thin">
-        {menuItems.map(renderNavItem)}
+        {filteredItems.map(renderNavItem)}
       </nav>
 
       {/* User footer */}
