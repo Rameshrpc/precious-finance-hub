@@ -21,6 +21,7 @@ const ROUTE_ACCESS: Record<string, AppRole[]> = {
   "/collection": ["super_admin", "tenant_admin", "manager", "staff"],
   "/communications": ["super_admin", "tenant_admin", "manager"],
   "/settings": ["super_admin", "tenant_admin"],
+  "/admin": ["super_admin"],
 };
 
 /**
