@@ -52,6 +52,9 @@ import {
 import SettingsFullPage from "./pages/SettingsFullPage";
 import SuperAdminPage from "./pages/SuperAdminPage";
 import CronStatusPage from "./pages/CronStatusPage";
+import TestChecklistPage from "./pages/TestChecklistPage";
+import HelpCenterPage from "./pages/HelpCenterPage";
+import WhatsNewDialog from "./components/WhatsNewDialog";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +67,7 @@ const App = () => (
         <GlobalSearch />
         <KeyboardShortcuts />
         <SessionTimeoutWarning />
+        <WhatsNewDialog />
         <Routes>
           <Route path="/" element={<Auth />} />
           <Route path="/auth" element={<Auth />} />
@@ -116,6 +120,8 @@ const App = () => (
             <Route path="/settings/security" element={<SecuritySettingsPage />} />
             <Route path="/settings/api-keys" element={<ApiKeysPage />} />
             <Route path="/admin" element={<SuperAdminPage />} />
+            <Route path="/admin/test-checklist" element={<TestChecklistPage />} />
+            <Route path="/help" element={<HelpCenterPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
