@@ -15,8 +15,8 @@ import CustomersPage from "./pages/CustomersPage";
 import MastersPage from "./pages/MastersPage";
 import LOSPipelinePage from "./pages/LOSPipelinePage";
 import NewApplicationPage from "./pages/NewApplicationPage";
+import TransactionsNewPage from "./pages/TransactionsNewPage";
 import {
-  TransactionsNewPage,
   TransactionsListPage,
   TransactionsPipelinePage,
   VaultPage,
