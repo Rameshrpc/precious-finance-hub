@@ -406,6 +406,85 @@ export type Database = {
           },
         ]
       }
+      loan_applications: {
+        Row: {
+          amount_requested: number
+          application_number: string
+          assigned_to: string | null
+          branch_id: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          documents: Json
+          estimated_gold_weight: number | null
+          id: string
+          notes: string | null
+          product_type: string
+          purpose: string | null
+          stage: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_requested?: number
+          application_number: string
+          assigned_to?: string | null
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          documents?: Json
+          estimated_gold_weight?: number | null
+          id?: string
+          notes?: string | null
+          product_type: string
+          purpose?: string | null
+          stage?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_requested?: number
+          application_number?: string
+          assigned_to?: string | null
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          documents?: Json
+          estimated_gold_weight?: number | null
+          id?: string
+          notes?: string | null
+          product_type?: string
+          purpose?: string | null
+          stage?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_applications_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loan_applications_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loan_applications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loan_schemes: {
         Row: {
           allowed_metals: string[]
@@ -639,6 +718,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_application_number: {
+        Args: { p_tenant_id: string }
+        Returns: string
+      }
       generate_customer_code: {
         Args: { p_branch_id: string; p_tenant_id: string }
         Returns: string
