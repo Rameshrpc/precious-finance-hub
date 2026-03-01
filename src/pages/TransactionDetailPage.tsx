@@ -13,9 +13,11 @@ import { formatINR, formatWeight, formatDate } from "@/lib/formatters";
 import { getLabel } from "@/lib/labels";
 import ChargeCollectionDialog from "@/components/ChargeCollectionDialog";
 import ClosureDialog from "@/components/ClosureDialog";
+import ReloanDialog from "@/components/ReloanDialog";
+import MarginRenewalDialog from "@/components/MarginRenewalDialog";
 import {
   ArrowLeft, IndianRupee, TrendingUp, Clock, FileText, Printer,
-  RefreshCw, Download, CircleDot
+  RefreshCw, Download, CircleDot, CalendarDays
 } from "lucide-react";
 import { differenceInDays } from "date-fns";
 
@@ -50,6 +52,8 @@ export default function TransactionDetailPage() {
   const { loan, loanLoading, pledgeItems, interestRecords, auditLogs, scheme } = useLoanDetail(id);
   const [chargeDialogOpen, setChargeDialogOpen] = useState(false);
   const [closureDialogOpen, setClosureDialogOpen] = useState(false);
+  const [reloanDialogOpen, setReloanDialogOpen] = useState(false);
+  const [marginRenewalOpen, setMarginRenewalOpen] = useState(false);
 
   if (loanLoading) {
     return (
@@ -93,7 +97,14 @@ export default function TransactionDetailPage() {
           <Button size="sm" variant="outline" className="gap-1" onClick={() => setChargeDialogOpen(true)} disabled={loan.status === "closed"}>
             <IndianRupee className="h-3.5 w-3.5" />Collect {getLabel(loan.product_type, "charge")}
           </Button>
-          <Button size="sm" variant="outline" className="gap-1"><RefreshCw className="h-3.5 w-3.5" />Reloan</Button>
+          <Button size="sm" variant="outline" className="gap-1" onClick={() => setReloanDialogOpen(true)} disabled={loan.status === "closed"}>
+            <RefreshCw className="h-3.5 w-3.5" />Reloan
+          </Button>
+          {loan.product_type === "SA" && (
+            <Button size="sm" variant="outline" className="gap-1" onClick={() => setMarginRenewalOpen(true)} disabled={loan.status === "closed"}>
+              <CalendarDays className="h-3.5 w-3.5" />Margin Renewal
+            </Button>
+          )}
           <Button size="sm" variant="destructive" className="gap-1" onClick={() => setClosureDialogOpen(true)} disabled={loan.status === "closed"}>
             {getLabel(loan.product_type, "closeVerb")}
           </Button>
@@ -359,6 +370,20 @@ export default function TransactionDetailPage() {
         pledgeItems={pledgeItems}
         interestRecords={interestRecords}
       />
+      <ReloanDialog
+        open={reloanDialogOpen}
+        onOpenChange={setReloanDialogOpen}
+        loan={loan}
+        pledgeItems={pledgeItems}
+        interestRecords={interestRecords}
+      />
+      {loan.product_type === "SA" && (
+        <MarginRenewalDialog
+          open={marginRenewalOpen}
+          onOpenChange={setMarginRenewalOpen}
+          loan={loan}
+        />
+      )}
     </div>
   );
 }

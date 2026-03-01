@@ -820,6 +820,73 @@ export type Database = {
           },
         ]
       }
+      margin_renewals: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          loan_id: string
+          margin_amount: number
+          new_expiry: string
+          new_scheme_id: string | null
+          notes: string | null
+          old_expiry: string | null
+          payment_mode: string
+          payment_reference: string | null
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          loan_id: string
+          margin_amount?: number
+          new_expiry: string
+          new_scheme_id?: string | null
+          notes?: string | null
+          old_expiry?: string | null
+          payment_mode?: string
+          payment_reference?: string | null
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          loan_id?: string
+          margin_amount?: number
+          new_expiry?: string
+          new_scheme_id?: string | null
+          notes?: string | null
+          old_expiry?: string | null
+          payment_mode?: string
+          payment_reference?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "margin_renewals_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "margin_renewals_new_scheme_id_fkey"
+            columns: ["new_scheme_id"]
+            isOneToOne: false
+            referencedRelation: "loan_schemes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "margin_renewals_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_rates: {
         Row: {
           created_at: string
@@ -874,6 +941,7 @@ export type Database = {
           loan_id: string
           metal_type: string
           net_weight: number
+          packet_id: string | null
           photo_url: string | null
           purity_id: string | null
           purity_name: string | null
@@ -895,6 +963,7 @@ export type Database = {
           loan_id: string
           metal_type?: string
           net_weight?: number
+          packet_id?: string | null
           photo_url?: string | null
           purity_id?: string | null
           purity_name?: string | null
@@ -916,6 +985,7 @@ export type Database = {
           loan_id?: string
           metal_type?: string
           net_weight?: number
+          packet_id?: string | null
           photo_url?: string | null
           purity_id?: string | null
           purity_name?: string | null
@@ -938,6 +1008,13 @@ export type Database = {
             columns: ["loan_id"]
             isOneToOne: false
             referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pledge_items_packet_id_fkey"
+            columns: ["packet_id"]
+            isOneToOne: false
+            referencedRelation: "vault_packets"
             referencedColumns: ["id"]
           },
           {
@@ -1029,6 +1106,58 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "purities_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      re_loans: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          new_loan_id: string
+          notes: string | null
+          old_loan_id: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          new_loan_id: string
+          notes?: string | null
+          old_loan_id: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          new_loan_id?: string
+          notes?: string | null
+          old_loan_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "re_loans_new_loan_id_fkey"
+            columns: ["new_loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "re_loans_old_loan_id_fkey"
+            columns: ["old_loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "re_loans_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -1152,6 +1281,163 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      vault_packet_loans: {
+        Row: {
+          created_at: string
+          id: string
+          loan_id: string
+          packet_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          loan_id: string
+          packet_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          loan_id?: string
+          packet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vault_packet_loans_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vault_packet_loans_packet_id_fkey"
+            columns: ["packet_id"]
+            isOneToOne: false
+            referencedRelation: "vault_packets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vault_packets: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          created_by: string | null
+          gold_weight: number
+          id: string
+          loans_count: number
+          notes: string | null
+          packet_number: string
+          silver_weight: number
+          slot_id: string | null
+          status: string
+          tenant_id: string
+          total_principal: number
+          updated_at: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          gold_weight?: number
+          id?: string
+          loans_count?: number
+          notes?: string | null
+          packet_number: string
+          silver_weight?: number
+          slot_id?: string | null
+          status?: string
+          tenant_id: string
+          total_principal?: number
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          gold_weight?: number
+          id?: string
+          loans_count?: number
+          notes?: string | null
+          packet_number?: string
+          silver_weight?: number
+          slot_id?: string | null
+          status?: string
+          tenant_id?: string
+          total_principal?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vault_packets_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vault_packets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vault_slots: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          id: string
+          is_occupied: boolean
+          packet_id: string | null
+          slot_name: string
+          slot_size: string
+          tenant_id: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          is_occupied?: boolean
+          packet_id?: string | null
+          slot_name: string
+          slot_size?: string
+          tenant_id: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          is_occupied?: boolean
+          packet_id?: string | null
+          slot_name?: string
+          slot_size?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vault_slots_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vault_slots_packet_id_fkey"
+            columns: ["packet_id"]
+            isOneToOne: false
+            referencedRelation: "vault_packets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vault_slots_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       voucher_lines: {
         Row: {
