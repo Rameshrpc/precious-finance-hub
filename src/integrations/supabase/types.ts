@@ -278,6 +278,76 @@ export type Database = {
           },
         ]
       }
+      balance_transfers: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          documents: Json | null
+          from_lender: string
+          id: string
+          new_loan_id: string | null
+          notes: string | null
+          original_amount: number
+          status: string
+          tenant_id: string
+          transfer_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          documents?: Json | null
+          from_lender: string
+          id?: string
+          new_loan_id?: string | null
+          notes?: string | null
+          original_amount?: number
+          status?: string
+          tenant_id: string
+          transfer_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          documents?: Json | null
+          from_lender?: string
+          id?: string
+          new_loan_id?: string | null
+          notes?: string | null
+          original_amount?: number
+          status?: string
+          tenant_id?: string
+          transfer_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "balance_transfers_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "balance_transfers_new_loan_id_fkey"
+            columns: ["new_loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "balance_transfers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bank_partners: {
         Row: {
           account_number: string | null
@@ -356,6 +426,60 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "branches_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chart_of_accounts: {
+        Row: {
+          account_type: string
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          is_system: boolean
+          name: string
+          parent_id: string | null
+          product_type: string | null
+          tenant_id: string
+        }
+        Insert: {
+          account_type?: string
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name: string
+          parent_id?: string | null
+          product_type?: string | null
+          tenant_id: string
+        }
+        Update: {
+          account_type?: string
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name?: string
+          parent_id?: string | null
+          product_type?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chart_of_accounts_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -1482,6 +1606,136 @@ export type Database = {
           },
           {
             foreignKeyName: "redemptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      repledge_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          payment_date: string
+          payment_mode: string
+          payment_type: string
+          reference: string | null
+          repledge_id: string
+          tenant_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_mode?: string
+          payment_type?: string
+          reference?: string | null
+          repledge_id: string
+          tenant_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_mode?: string
+          payment_type?: string
+          reference?: string | null
+          repledge_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repledge_payments_repledge_id_fkey"
+            columns: ["repledge_id"]
+            isOneToOne: false
+            referencedRelation: "repledges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repledge_payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      repledges: {
+        Row: {
+          amount: number
+          bank_name: string
+          bank_partner_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          maturity_date: string | null
+          notes: string | null
+          packet_id: string
+          rate: number
+          start_date: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          bank_name: string
+          bank_partner_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          maturity_date?: string | null
+          notes?: string | null
+          packet_id: string
+          rate?: number
+          start_date?: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          bank_name?: string
+          bank_partner_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          maturity_date?: string | null
+          notes?: string | null
+          packet_id?: string
+          rate?: number
+          start_date?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repledges_bank_partner_id_fkey"
+            columns: ["bank_partner_id"]
+            isOneToOne: false
+            referencedRelation: "bank_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repledges_packet_id_fkey"
+            columns: ["packet_id"]
+            isOneToOne: false
+            referencedRelation: "vault_packets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repledges_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"

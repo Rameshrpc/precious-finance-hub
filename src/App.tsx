@@ -23,12 +23,14 @@ import OpeningBalanceImportPage from "./pages/OpeningBalanceImportPage";
 import ForfeituresPage from "./pages/ForfeituresPage";
 import ApprovalsPage from "./pages/ApprovalsPage";
 import AuctionsPage from "./pages/AuctionsPage";
+import BalanceTransferPage from "./pages/BalanceTransferPage";
+import ChartOfAccountsPage from "./pages/ChartOfAccountsPage";
+import ManualVoucherPage from "./pages/ManualVoucherPage";
+import DayBookPage from "./pages/DayBookPage";
+import LedgerPage from "./pages/LedgerPage";
+import TrialBalancePage from "./pages/TrialBalancePage";
 import {
   TransactionsPipelinePage,
-  VouchersPage,
-  DayBookPage,
-  LedgerPage,
-  TrialBalancePage,
   PnLPage,
   BalanceSheetPage,
   ReportsPage,
