@@ -81,6 +81,7 @@ const menuItems: NavItem[] = [
     ],
   },
   { label: "Settings", path: "/settings", icon: Settings },
+  { label: "Super Admin", path: "/admin", icon: Settings },
 ];
 
 const AppSidebar = () => {

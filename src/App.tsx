@@ -48,8 +48,9 @@ import KeyboardShortcuts from "./components/KeyboardShortcuts";
 import SessionTimeoutWarning from "./components/SessionTimeoutWarning";
 import {
   TransactionsPipelinePage,
-  SettingsPage,
 } from "./pages/PlaceholderPages";
+import SettingsFullPage from "./pages/SettingsFullPage";
+import SuperAdminPage from "./pages/SuperAdminPage";
 import CronStatusPage from "./pages/CronStatusPage";
 
 const queryClient = new QueryClient();
@@ -109,11 +110,12 @@ const App = () => (
             <Route path="/collection/grievance" element={<GrievancePage />} />
             <Route path="/communications/whatsapp" element={<WhatsAppInboxPage />} />
             <Route path="/communications/templates" element={<TemplatesManagerPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/settings" element={<SettingsFullPage />} />
             <Route path="/settings/masters" element={<MastersPage />} />
             <Route path="/settings/cron-status" element={<CronStatusPage />} />
             <Route path="/settings/security" element={<SecuritySettingsPage />} />
             <Route path="/settings/api-keys" element={<ApiKeysPage />} />
+            <Route path="/admin" element={<SuperAdminPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
