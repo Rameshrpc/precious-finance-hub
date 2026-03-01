@@ -53,7 +53,7 @@ const menuItems: NavItem[] = [
     children: [
       { label: "New Transaction", path: "/transactions/new", icon: FilePlus },
       { label: "All Transactions", path: "/transactions", icon: List },
-      { label: "LOS Pipeline", path: "/transactions/pipeline", icon: GitBranch },
+      { label: "LOS Pipeline", path: "/transactions/los", icon: GitBranch },
     ],
   },
   { label: "Gold Vault", path: "/vault", icon: Lock },

@@ -13,6 +13,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import CustomersPage from "./pages/CustomersPage";
 import MastersPage from "./pages/MastersPage";
+import LOSPipelinePage from "./pages/LOSPipelinePage";
+import NewApplicationPage from "./pages/NewApplicationPage";
 import {
   TransactionsNewPage,
   TransactionsListPage,
@@ -58,6 +60,8 @@ const App = () => (
             <Route path="/transactions/new" element={<TransactionsNewPage />} />
             <Route path="/transactions" element={<TransactionsListPage />} />
             <Route path="/transactions/pipeline" element={<TransactionsPipelinePage />} />
+            <Route path="/transactions/los" element={<LOSPipelinePage />} />
+            <Route path="/transactions/los/new" element={<NewApplicationPage />} />
             <Route path="/vault" element={<VaultPage />} />
             <Route path="/accounting/vouchers" element={<VouchersPage />} />
             <Route path="/accounting/daybook" element={<DayBookPage />} />

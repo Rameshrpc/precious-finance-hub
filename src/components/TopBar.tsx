@@ -31,6 +31,8 @@ const breadcrumbMap: Record<string, string> = {
   "/customers": "Customers",
   "/transactions": "Transactions",
   "/transactions/new": "New Transaction",
+  "/transactions/los": "LOS Pipeline",
+  "/transactions/los/new": "New Application",
   "/transactions/pipeline": "LOS Pipeline",
   "/vault": "Gold Vault",
   "/accounting": "Accounting",
