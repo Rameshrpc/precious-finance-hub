@@ -46,6 +46,21 @@ export default function PartialReleaseDialog({ open, onOpenChange, loan, pledgeI
   const handleRelease = async () => {
     if (selectedIds.size === 0) return;
     if (!ltvOk) { toast.error("Cannot release: LTV would exceed 100%"); return; }
+
+    // Check if any pledge item's packet has an active repledge
+    const packetIds = [...new Set(pledgeItems.filter(i => selectedIds.has(i.id) && i.packet_id).map(i => i.packet_id))];
+    if (packetIds.length > 0) {
+      const { data: activeRepledges } = await supabase
+        .from("repledges")
+        .select("bank_name, packet:vault_packets(packet_number)")
+        .in("packet_id", packetIds)
+        .eq("status", "active");
+      if (activeRepledges && activeRepledges.length > 0) {
+        const rep = activeRepledges[0] as any;
+        toast.error(`Cannot release. Packet repledged to ${rep.bank_name}. Close repledge first.`);
+        return;
+      }
+    }
     try {
       for (const id of selectedIds) {
         await supabase.from("pledge_items").update({ is_released: true, released_at: new Date().toISOString() }).eq("id", id);

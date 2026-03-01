@@ -16,9 +16,10 @@ import ClosureDialog from "@/components/ClosureDialog";
 import ReloanDialog from "@/components/ReloanDialog";
 import MarginRenewalDialog from "@/components/MarginRenewalDialog";
 import PartialReleaseDialog from "@/components/PartialReleaseDialog";
+import LoanRestructureDialog from "@/components/LoanRestructureDialog";
 import {
   ArrowLeft, IndianRupee, TrendingUp, Clock, FileText, Printer,
-  RefreshCw, Download, CircleDot, CalendarDays
+  RefreshCw, Download, CircleDot, CalendarDays, Wrench
 } from "lucide-react";
 import { differenceInDays } from "date-fns";
 
@@ -56,6 +57,7 @@ export default function TransactionDetailPage() {
   const [reloanDialogOpen, setReloanDialogOpen] = useState(false);
   const [marginRenewalOpen, setMarginRenewalOpen] = useState(false);
   const [partialReleaseOpen, setPartialReleaseOpen] = useState(false);
+  const [restructureOpen, setRestructureOpen] = useState(false);
 
   if (loanLoading) {
     return (
@@ -107,6 +109,9 @@ export default function TransactionDetailPage() {
               <CalendarDays className="h-3.5 w-3.5" />Margin Renewal
             </Button>
           )}
+          <Button size="sm" variant="outline" className="gap-1" onClick={() => setRestructureOpen(true)} disabled={loan.status === "closed"}>
+            <Wrench className="h-3.5 w-3.5" />Restructure
+          </Button>
           <Button size="sm" variant="destructive" className="gap-1" onClick={() => setClosureDialogOpen(true)} disabled={loan.status === "closed"}>
             {getLabel(loan.product_type, "closeVerb")}
           </Button>
@@ -406,6 +411,11 @@ export default function TransactionDetailPage() {
         onOpenChange={setPartialReleaseOpen}
         loan={loan}
         pledgeItems={pledgeItems}
+      />
+      <LoanRestructureDialog
+        open={restructureOpen}
+        onOpenChange={setRestructureOpen}
+        loan={loan}
       />
     </div>
   );

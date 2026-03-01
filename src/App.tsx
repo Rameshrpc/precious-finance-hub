@@ -71,6 +71,7 @@ const App = () => (
             <Route path="/transactions/import" element={<OpeningBalanceImportPage />} />
             <Route path="/transactions/forfeitures" element={<ForfeituresPage />} />
             <Route path="/transactions/auctions" element={<AuctionsPage />} />
+            <Route path="/transactions/balance-transfer" element={<BalanceTransferPage />} />
             <Route path="/transactions/los" element={<LOSPipelinePage />} />
             <Route path="/transactions/los/new" element={<NewApplicationPage />} />
             <Route path="/vault" element={<VaultPage />} />
