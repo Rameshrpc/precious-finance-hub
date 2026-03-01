@@ -1,179 +1,231 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail, Phone } from "lucide-react";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        navigate("/dashboard");
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { full_name: fullName },
-            emailRedirectTo: window.location.origin,
-          },
-        });
-        if (error) throw error;
-        toast({
-          title: "Account created",
-          description: "Check your email for verification link.",
-        });
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      navigate("/dashboard");
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
+      toast({ title: "Login failed", description: error.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendOtp = async () => {
+    if (phone.length !== 10) {
+      toast({ title: "Invalid phone", description: "Enter a valid 10-digit number", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({ phone: `+91${phone}` });
+      if (error) throw error;
+      setOtpSent(true);
+      toast({ title: "OTP sent", description: `OTP sent to +91 ${phone}` });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otp.length !== 6) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        phone: `+91${phone}`,
+        token: otp,
+        type: "sms",
       });
+      if (error) throw error;
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast({ title: "Verification failed", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 gradient-hero items-center justify-center p-12 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-64 h-64 rounded-full border border-gold/30" />
-          <div className="absolute bottom-32 right-16 w-48 h-48 rounded-full border border-gold/20" />
-          <div className="absolute top-1/2 left-1/3 w-96 h-96 rounded-full border border-gold/10" />
-        </div>
-        <div className="relative z-10 max-w-lg">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl gradient-gold flex items-center justify-center">
-              <span className="text-primary-foreground font-display font-bold text-xl">C</span>
-            </div>
-            <div>
-              <h1 className="text-2xl font-display font-bold text-primary-foreground tracking-tight">
-                CofiZen
-              </h1>
-              <p className="text-sm text-gold-light font-medium tracking-wider uppercase">
-                Gold & Silver
-              </p>
-            </div>
-          </div>
-          <h2 className="text-4xl font-display font-bold text-primary-foreground mb-4 leading-tight">
-            Precious Metals Finance,{" "}
-            <span className="text-gold-shimmer">Simplified.</span>
-          </h2>
-          <p className="text-lg text-silver-light leading-relaxed">
-            Manage gold loans, purchase orders, and sale agreements across branches — 
-            all in one secure, multi-tenant platform.
-          </p>
-          <div className="mt-10 flex gap-8 text-silver-light">
-            <div>
-              <p className="text-2xl font-bold text-gold">₹500Cr+</p>
-              <p className="text-sm">Assets Managed</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gold">1000+</p>
-              <p className="text-sm">Active Loans</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gold">50+</p>
-              <p className="text-sm">Branches</p>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen flex items-center justify-center gradient-hero p-4 relative overflow-hidden">
+      {/* Decorative circles */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full border border-gold/10" />
+        <div className="absolute -bottom-48 -right-24 w-[500px] h-[500px] rounded-full border border-gold/5" />
+        <div className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full border border-gold/8" />
       </div>
 
-      {/* Right Panel - Auth Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-background">
-        <div className="w-full max-w-md animate-fade-in">
-          {/* Mobile logo */}
-          <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
-              <span className="text-primary-foreground font-display font-bold text-lg">C</span>
+      <Card className="w-full max-w-md relative z-10 shadow-2xl border-border/50 animate-fade-in">
+        <CardHeader className="text-center pb-4 pt-8">
+          {/* Logo */}
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="w-11 h-11 rounded-xl gradient-gold flex items-center justify-center shadow-gold">
+              <span className="font-display font-bold text-lg text-gold-foreground">C</span>
             </div>
-            <span className="text-xl font-display font-bold text-primary">CofiZen</span>
+            <h1 className="text-2xl font-display font-bold text-foreground tracking-tight">
+              Cofi<span className="text-gold-shimmer">Zen</span>
+            </h1>
           </div>
+          <p className="text-xs text-muted-foreground tracking-widest uppercase font-medium">
+            Gold & Silver
+          </p>
+        </CardHeader>
 
-          <div className="mb-8">
-            <h3 className="text-2xl font-display font-bold text-foreground">
-              {isLogin ? "Welcome back" : "Create account"}
-            </h3>
-            <p className="text-muted-foreground mt-1">
-              {isLogin
-                ? "Sign in to your CofiZen account"
-                : "Get started with CofiZen Gold & Silver"}
-            </p>
-          </div>
+        <CardContent className="px-6 pb-8">
+          <Tabs defaultValue="email" className="w-full">
+            <TabsList className="w-full mb-6">
+              <TabsTrigger value="email" className="flex-1 gap-2">
+                <Mail className="h-3.5 w-3.5" /> Email
+              </TabsTrigger>
+              <TabsTrigger value="phone" className="flex-1 gap-2">
+                <Phone className="h-3.5 w-3.5" /> Phone OTP
+              </TabsTrigger>
+            </TabsList>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input
-                  id="fullName"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Enter your full name"
-                  required={!isLogin}
-                />
+            {/* Email + Password Tab */}
+            <TabsContent value="email">
+              <form onSubmit={handleEmailLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@company.com"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    <button
+                      type="button"
+                      className="text-xs font-medium text-gold hover:text-gold-light transition-colors"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    minLength={6}
+                  />
+                </div>
+                <Button type="submit" variant="gold" className="w-full" size="lg" disabled={loading}>
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Sign In
+                </Button>
+              </form>
+            </TabsContent>
+
+            {/* Phone OTP Tab */}
+            <TabsContent value="phone">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <div className="flex gap-2">
+                    <div className="flex items-center px-3 rounded-md border border-input bg-muted text-sm font-medium text-muted-foreground shrink-0">
+                      +91
+                    </div>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                        setPhone(val);
+                      }}
+                      placeholder="98765 43210"
+                      maxLength={10}
+                      disabled={otpSent}
+                    />
+                  </div>
+                </div>
+
+                {!otpSent ? (
+                  <Button
+                    variant="gold"
+                    className="w-full"
+                    size="lg"
+                    onClick={handleSendOtp}
+                    disabled={loading || phone.length !== 10}
+                  >
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Send OTP
+                  </Button>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <Label>Enter 6-digit OTP</Label>
+                      <div className="flex justify-center">
+                        <InputOTP maxLength={6} value={otp} onChange={setOtp}>
+                          <InputOTPGroup>
+                            <InputOTPSlot index={0} />
+                            <InputOTPSlot index={1} />
+                            <InputOTPSlot index={2} />
+                            <InputOTPSlot index={3} />
+                            <InputOTPSlot index={4} />
+                            <InputOTPSlot index={5} />
+                          </InputOTPGroup>
+                        </InputOTP>
+                      </div>
+                    </div>
+                    <Button
+                      variant="gold"
+                      className="w-full"
+                      size="lg"
+                      onClick={handleVerifyOtp}
+                      disabled={loading || otp.length !== 6}
+                    >
+                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Verify & Sign In
+                    </Button>
+                    <button
+                      type="button"
+                      className="w-full text-center text-xs text-gold hover:text-gold-light transition-colors"
+                      onClick={() => {
+                        setOtpSent(false);
+                        setOtp("");
+                      }}
+                    >
+                      Change number / Resend OTP
+                    </button>
+                  </>
+                )}
               </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@company.com"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                minLength={6}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLogin ? "Sign In" : "Create Account"}
-            </Button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="font-medium text-accent hover:underline"
-            >
-              {isLogin ? "Sign up" : "Sign in"}
-            </button>
-          </p>
-        </div>
-      </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };
