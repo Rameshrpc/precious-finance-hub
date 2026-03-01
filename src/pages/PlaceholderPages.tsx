@@ -8,7 +8,7 @@ const PlaceholderPage = ({ title, description }: { title: string; description?: 
   </div>
 );
 
-export const CustomersPage = () => <PlaceholderPage title="Customers" description="Manage customer profiles and KYC" />;
+
 export const TransactionsNewPage = () => <PlaceholderPage title="New Transaction" description="Create a new gold loan, purchase or sale" />;
 export const TransactionsListPage = () => <PlaceholderPage title="All Transactions" description="View and filter all transactions" />;
 export const TransactionsPipelinePage = () => <PlaceholderPage title="LOS Pipeline" description="Loan origination pipeline view" />;

@@ -49,6 +49,105 @@ export type Database = {
           },
         ]
       }
+      customers: {
+        Row: {
+          aadhaar: string | null
+          aadhaar_verified: boolean
+          address: string | null
+          area: string | null
+          branch_id: string | null
+          category: string
+          city: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          name: string
+          nominee_name: string | null
+          nominee_phone: string | null
+          nominee_relation: string | null
+          pan: string | null
+          phone: string
+          photo_url: string | null
+          pincode: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+          whatsapp_phone: string | null
+          whatsapp_same_as_phone: boolean
+        }
+        Insert: {
+          aadhaar?: string | null
+          aadhaar_verified?: boolean
+          address?: string | null
+          area?: string | null
+          branch_id?: string | null
+          category?: string
+          city?: string | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          nominee_name?: string | null
+          nominee_phone?: string | null
+          nominee_relation?: string | null
+          pan?: string | null
+          phone: string
+          photo_url?: string | null
+          pincode?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          whatsapp_phone?: string | null
+          whatsapp_same_as_phone?: boolean
+        }
+        Update: {
+          aadhaar?: string | null
+          aadhaar_verified?: boolean
+          address?: string | null
+          area?: string | null
+          branch_id?: string | null
+          category?: string
+          city?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          nominee_name?: string | null
+          nominee_phone?: string | null
+          nominee_relation?: string | null
+          pan?: string | null
+          phone?: string
+          photo_url?: string | null
+          pincode?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          whatsapp_phone?: string | null
+          whatsapp_same_as_phone?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           branch_id: string | null
@@ -138,6 +237,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_customer_code: {
+        Args: { p_branch_id: string; p_tenant_id: string }
+        Returns: string
+      }
       get_user_tenant_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
