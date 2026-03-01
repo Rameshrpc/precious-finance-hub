@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { formatINR } from "@/lib/indian-locale";
 import { ROLE_LABELS } from "@/lib/indian-locale";
 import { Button } from "@/components/ui/button";
+import NotificationCenter from "@/components/NotificationCenter";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -126,11 +127,8 @@ const TopBar = () => {
           </span>
         </div>
 
-        {/* Bell */}
-        <Button variant="ghost" size="icon" className="h-9 w-9 relative">
-          <Bell className="h-4 w-4" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-destructive" />
-        </Button>
+        {/* Notification Center */}
+        <NotificationCenter />
 
         {/* User dropdown */}
         <DropdownMenu>
