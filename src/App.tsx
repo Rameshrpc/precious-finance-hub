@@ -26,13 +26,13 @@ import AuctionsPage from "./pages/AuctionsPage";
 import BalanceTransferPage from "./pages/BalanceTransferPage";
 import ChartOfAccountsPage from "./pages/ChartOfAccountsPage";
 import ManualVoucherPage from "./pages/ManualVoucherPage";
+import PnLPage from "./pages/PnLPage";
+import BalanceSheetPage from "./pages/BalanceSheetPage";
 import DayBookPage from "./pages/DayBookPage";
 import LedgerPage from "./pages/LedgerPage";
 import TrialBalancePage from "./pages/TrialBalancePage";
 import {
   TransactionsPipelinePage,
-  PnLPage,
-  BalanceSheetPage,
   ReportsPage,
   CollectionPage,
   WhatsAppInboxPage,
@@ -75,6 +75,7 @@ const App = () => (
             <Route path="/transactions/los" element={<LOSPipelinePage />} />
             <Route path="/transactions/los/new" element={<NewApplicationPage />} />
             <Route path="/vault" element={<VaultPage />} />
+            <Route path="/accounting/chart" element={<ChartOfAccountsPage />} />
             <Route path="/accounting/vouchers" element={<ManualVoucherPage />} />
             <Route path="/accounting/daybook" element={<DayBookPage />} />
             <Route path="/accounting/ledger" element={<LedgerPage />} />

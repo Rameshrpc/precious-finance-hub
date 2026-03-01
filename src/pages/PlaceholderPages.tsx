@@ -17,8 +17,7 @@ export const VouchersPage = () => <PlaceholderPage title="Vouchers" description=
 export const DayBookPage = () => <PlaceholderPage title="Day Book" description="Daily transaction journal" />;
 export const LedgerPage = () => <PlaceholderPage title="Ledger" description="Account-wise ledger view" />;
 export const TrialBalancePage = () => <PlaceholderPage title="Trial Balance" description="Periodic trial balance report" />;
-export const PnLPage = () => <PlaceholderPage title="Profit & Loss" description="Income and expense statement" />;
-export const BalanceSheetPage = () => <PlaceholderPage title="Balance Sheet" description="Assets, liabilities and equity" />;
+// PnLPage and BalanceSheetPage moved to dedicated files
 export const ReportsPage = () => <PlaceholderPage title="Reports" description="Business analytics and reports" />;
 // ApprovalsPage moved to dedicated file
 export const CollectionPage = () => <PlaceholderPage title="Collection" description="Repayment collection tracking" />;
