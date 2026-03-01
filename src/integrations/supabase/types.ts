@@ -284,6 +284,51 @@ export type Database = {
           },
         ]
       }
+      holidays: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          holiday_date: string
+          holiday_type: string
+          id: string
+          name: string
+          tenant_id: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          holiday_date: string
+          holiday_type?: string
+          id?: string
+          name: string
+          tenant_id: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          holiday_date?: string
+          holiday_type?: string
+          id?: string
+          name?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holidays_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "holidays_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       item_groups: {
         Row: {
           created_at: string
