@@ -30,8 +30,29 @@ export default function CustomerQuickCard({ customerId, children }: CustomerQuic
     },
   });
 
-  // Placeholder for loan aggregates — will be populated when loans table exists
-  const loanStats = { activeLoans: 0, totalOutstanding: 0, lastTxnDate: null as string | null };
+  const { data: loanStats } = useQuery({
+    queryKey: ["customer-loan-stats", customerId],
+    enabled: !!customerId,
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("loans")
+        .select("id, amount, status, created_at")
+        .eq("customer_id", customerId)
+        .eq("status", "active");
+      if (error) throw error;
+      const rows = data || [];
+      return {
+        activeLoans: rows.length,
+        totalOutstanding: rows.reduce((sum, l) => sum + Number(l.amount), 0),
+        lastTxnDate: rows.length > 0
+          ? rows.sort((a, b) => b.created_at.localeCompare(a.created_at))[0].created_at
+          : null,
+      };
+    },
+  });
+
+  const stats = loanStats || { activeLoans: 0, totalOutstanding: 0, lastTxnDate: null as string | null };
 
   return (
     <HoverCard openDelay={200} closeDelay={100}>
@@ -74,12 +95,12 @@ export default function CustomerQuickCard({ customerId, children }: CustomerQuic
                 {customer.status !== "active" && <Badge variant="destructive" className="text-[10px]">{customer.status}</Badge>}
               </div>
               <div className="flex justify-between pt-1 border-t border-border">
-                <span>Active Loans: <strong className="text-foreground">{loanStats.activeLoans}</strong></span>
-                <span>Outstanding: <strong className="text-foreground">{formatINR(loanStats.totalOutstanding, 0)}</strong></span>
+                <span>Active Loans: <strong className="text-foreground">{stats.activeLoans}</strong></span>
+                <span>Outstanding: <strong className="text-foreground">{formatINR(stats.totalOutstanding, 0)}</strong></span>
               </div>
-              {loanStats.lastTxnDate && (
+              {stats.lastTxnDate && (
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-3 w-3" />Last txn: {formatDateIN(loanStats.lastTxnDate)}
+                  <Calendar className="h-3 w-3" />Last txn: {formatDateIN(stats.lastTxnDate)}
                 </div>
               )}
             </div>
