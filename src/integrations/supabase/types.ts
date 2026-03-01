@@ -100,6 +100,50 @@ export type Database = {
           },
         ]
       }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          entity_id: string
+          entity_type: string
+          id: string
+          performed_by: string | null
+          performed_by_name: string | null
+          tenant_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          performed_by?: string | null
+          performed_by_name?: string | null
+          tenant_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          performed_by?: string | null
+          performed_by_name?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bank_partners: {
         Row: {
           account_number: string | null
@@ -322,6 +366,87 @@ export type Database = {
           },
           {
             foreignKeyName: "holidays_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interest_records: {
+        Row: {
+          amount: number
+          created_at: string
+          days: number
+          due_date: string
+          id: string
+          loan_id: string
+          notes: string | null
+          paid: number
+          payment_date: string | null
+          payment_mode: string | null
+          penalty: number
+          period_end: string
+          period_start: string
+          principal: number
+          rate: number
+          receipt_number: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          days?: number
+          due_date: string
+          id?: string
+          loan_id: string
+          notes?: string | null
+          paid?: number
+          payment_date?: string | null
+          payment_mode?: string | null
+          penalty?: number
+          period_end: string
+          period_start: string
+          principal?: number
+          rate?: number
+          receipt_number?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          days?: number
+          due_date?: string
+          id?: string
+          loan_id?: string
+          notes?: string | null
+          paid?: number
+          payment_date?: string | null
+          payment_mode?: string | null
+          penalty?: number
+          period_end?: string
+          period_start?: string
+          principal?: number
+          rate?: number
+          receipt_number?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interest_records_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interest_records_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"

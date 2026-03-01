@@ -16,8 +16,9 @@ import MastersPage from "./pages/MastersPage";
 import LOSPipelinePage from "./pages/LOSPipelinePage";
 import NewApplicationPage from "./pages/NewApplicationPage";
 import TransactionsNewPage from "./pages/TransactionsNewPage";
+import TransactionsListPage from "./pages/TransactionsListPage";
+import TransactionDetailPage from "./pages/TransactionDetailPage";
 import {
-  TransactionsListPage,
   TransactionsPipelinePage,
   VaultPage,
   VouchersPage,
@@ -57,8 +58,9 @@ const App = () => (
           >
             <Route path="/dashboard" element={<DashboardHome />} />
             <Route path="/customers" element={<CustomersPage />} />
-            <Route path="/transactions/new" element={<TransactionsNewPage />} />
             <Route path="/transactions" element={<TransactionsListPage />} />
+            <Route path="/transactions/new" element={<TransactionsNewPage />} />
+            <Route path="/transactions/:id" element={<TransactionDetailPage />} />
             <Route path="/transactions/pipeline" element={<TransactionsPipelinePage />} />
             <Route path="/transactions/los" element={<LOSPipelinePage />} />
             <Route path="/transactions/los/new" element={<NewApplicationPage />} />
