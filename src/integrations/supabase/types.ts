@@ -62,6 +62,59 @@ export type Database = {
           },
         ]
       }
+      api_keys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          rate_limit: number
+          scopes: string[]
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name: string
+          rate_limit?: number
+          scopes?: string[]
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          rate_limit?: number
+          scopes?: string[]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       approval_requests: {
         Row: {
           amount: number
@@ -426,6 +479,72 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "branches_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cash_register: {
+        Row: {
+          branch_id: string | null
+          closing_balance: number
+          created_at: string
+          discrepancy: number
+          id: string
+          notes: string | null
+          opening_balance: number
+          physical_count: number | null
+          register_date: string
+          tenant_id: string
+          total_inflows: number
+          total_outflows: number
+          updated_at: string
+          verified_by: string | null
+        }
+        Insert: {
+          branch_id?: string | null
+          closing_balance?: number
+          created_at?: string
+          discrepancy?: number
+          id?: string
+          notes?: string | null
+          opening_balance?: number
+          physical_count?: number | null
+          register_date?: string
+          tenant_id: string
+          total_inflows?: number
+          total_outflows?: number
+          updated_at?: string
+          verified_by?: string | null
+        }
+        Update: {
+          branch_id?: string | null
+          closing_balance?: number
+          created_at?: string
+          discrepancy?: number
+          id?: string
+          notes?: string | null
+          opening_balance?: number
+          physical_count?: number | null
+          register_date?: string
+          tenant_id?: string
+          total_inflows?: number
+          total_outflows?: number
+          updated_at?: string
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_register_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_register_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -903,6 +1022,78 @@ export type Database = {
           },
           {
             foreignKeyName: "forfeitures_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grievances: {
+        Row: {
+          assigned_to: string | null
+          category: string
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          description: string
+          escalation_level: string
+          id: string
+          priority: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          sla_ack_at: string | null
+          sla_resolve_at: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          description: string
+          escalation_level?: string
+          id?: string
+          priority?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          sla_ack_at?: string | null
+          sla_resolve_at?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          description?: string
+          escalation_level?: string
+          id?: string
+          priority?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          sla_ack_at?: string | null
+          sla_resolve_at?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grievances_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grievances_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"

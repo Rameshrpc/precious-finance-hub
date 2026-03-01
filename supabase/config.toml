@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.waha-webhook]
 verify_jwt = false
+
+[functions.rest-api]
+verify_jwt = false
