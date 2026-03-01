@@ -1,1 +1,4 @@
 project_id = "oqyehjqduvnrvuckzqer"
+
+[functions.daily-cron]
+verify_jwt = false

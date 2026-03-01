@@ -39,6 +39,7 @@ import {
   TemplatesPage,
   SettingsPage,
 } from "./pages/PlaceholderPages";
+import CronStatusPage from "./pages/CronStatusPage";
 
 const queryClient = new QueryClient();
 
@@ -86,6 +87,7 @@ const App = () => (
             <Route path="/communications/templates" element={<TemplatesPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/settings/masters" element={<MastersPage />} />
+            <Route path="/settings/cron-status" element={<CronStatusPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
