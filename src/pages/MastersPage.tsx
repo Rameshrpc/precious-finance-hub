@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Layers, Package, Gem, FileText, MapPin, UserCheck, Building2, TrendingUp } from "lucide-react";
+import { Layers, Package, Gem, FileText, MapPin, UserCheck, Building2, TrendingUp, CalendarDays } from "lucide-react";
 import ItemGroupsTab from "@/components/masters/ItemGroupsTab";
 import ItemsTab from "@/components/masters/ItemsTab";
 import PuritiesTab from "@/components/masters/PuritiesTab";
@@ -8,6 +8,7 @@ import AreasTab from "@/components/masters/AreasTab";
 import AgentsTab from "@/components/masters/AgentsTab";
 import BankPartnersTab from "@/components/masters/BankPartnersTab";
 import MarketRatesTab from "@/components/masters/MarketRatesTab";
+import HolidaysTab from "@/components/masters/HolidaysTab";
 
 const tabs = [
   { value: "item-groups", label: "Item Groups", icon: Layers },
@@ -18,6 +19,7 @@ const tabs = [
   { value: "agents", label: "Agents", icon: UserCheck },
   { value: "bank-nbfc", label: "Bank/NBFC", icon: Building2 },
   { value: "market-rates", label: "Market Rates", icon: TrendingUp },
+  { value: "holidays", label: "Holidays", icon: CalendarDays },
 ];
 
 export default function MastersPage() {
@@ -41,6 +43,7 @@ export default function MastersPage() {
         <TabsContent value="agents"><AgentsTab /></TabsContent>
         <TabsContent value="bank-nbfc"><BankPartnersTab /></TabsContent>
         <TabsContent value="market-rates"><MarketRatesTab /></TabsContent>
+        <TabsContent value="holidays"><HolidaysTab /></TabsContent>
       </Tabs>
     </div>
   );

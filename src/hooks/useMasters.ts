@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 // Generic hook factory for simple CRUD masters
 function useMasterTable<T extends { id: string }>(
-  table: "item_groups" | "items" | "purities" | "loan_schemes" | "areas" | "agents" | "bank_partners" | "market_rates",
+  table: "item_groups" | "items" | "purities" | "loan_schemes" | "areas" | "agents" | "bank_partners" | "market_rates" | "holidays",
   selectStr = "*"
 ) {
   const { tenantId } = useTenant();
