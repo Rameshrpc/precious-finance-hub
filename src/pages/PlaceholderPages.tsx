@@ -20,7 +20,7 @@ export const TrialBalancePage = () => <PlaceholderPage title="Trial Balance" des
 export const PnLPage = () => <PlaceholderPage title="Profit & Loss" description="Income and expense statement" />;
 export const BalanceSheetPage = () => <PlaceholderPage title="Balance Sheet" description="Assets, liabilities and equity" />;
 export const ReportsPage = () => <PlaceholderPage title="Reports" description="Business analytics and reports" />;
-export const ApprovalsPage = () => <PlaceholderPage title="Approvals" description="Pending approvals queue" />;
+// ApprovalsPage moved to dedicated file
 export const CollectionPage = () => <PlaceholderPage title="Collection" description="Repayment collection tracking" />;
 export const WhatsAppInboxPage = () => <PlaceholderPage title="WhatsApp Inbox" description="Customer communication via WhatsApp" />;
 export const TemplatesPage = () => <PlaceholderPage title="Templates" description="Message and document templates" />;

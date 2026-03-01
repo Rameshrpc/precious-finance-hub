@@ -20,6 +20,9 @@ import TransactionsListPage from "./pages/TransactionsListPage";
 import TransactionDetailPage from "./pages/TransactionDetailPage";
 import VaultPage from "./pages/VaultPage";
 import OpeningBalanceImportPage from "./pages/OpeningBalanceImportPage";
+import ForfeituresPage from "./pages/ForfeituresPage";
+import ApprovalsPage from "./pages/ApprovalsPage";
+import AuctionsPage from "./pages/AuctionsPage";
 import {
   TransactionsPipelinePage,
   VouchersPage,
@@ -29,7 +32,6 @@ import {
   PnLPage,
   BalanceSheetPage,
   ReportsPage,
-  ApprovalsPage,
   CollectionPage,
   WhatsAppInboxPage,
   TemplatesPage,
@@ -64,6 +66,8 @@ const App = () => (
             <Route path="/transactions/:id" element={<TransactionDetailPage />} />
             <Route path="/transactions/pipeline" element={<TransactionsPipelinePage />} />
             <Route path="/transactions/import" element={<OpeningBalanceImportPage />} />
+            <Route path="/transactions/forfeitures" element={<ForfeituresPage />} />
+            <Route path="/transactions/auctions" element={<AuctionsPage />} />
             <Route path="/transactions/los" element={<LOSPipelinePage />} />
             <Route path="/transactions/los/new" element={<NewApplicationPage />} />
             <Route path="/vault" element={<VaultPage />} />

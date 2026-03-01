@@ -62,6 +62,71 @@ export type Database = {
           },
         ]
       }
+      approval_requests: {
+        Row: {
+          amount: number
+          created_at: string
+          details: Json | null
+          entity_id: string
+          entity_type: string
+          id: string
+          request_type: string
+          requested_by: string | null
+          requested_by_name: string | null
+          review_comment: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewed_by_name: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          details?: Json | null
+          entity_id: string
+          entity_type?: string
+          id?: string
+          request_type: string
+          requested_by?: string | null
+          requested_by_name?: string | null
+          review_comment?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewed_by_name?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          details?: Json | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          request_type?: string
+          requested_by?: string | null
+          requested_by_name?: string | null
+          review_comment?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewed_by_name?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       areas: {
         Row: {
           city: string
@@ -93,6 +158,75 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "areas_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auctions: {
+        Row: {
+          auction_date: string | null
+          buyer_name: string | null
+          buyer_phone: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          loan_id: string
+          notes: string | null
+          notice_sent_at: string | null
+          reserve_price: number
+          sale_price: number | null
+          status: string
+          surplus_deficit: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          auction_date?: string | null
+          buyer_name?: string | null
+          buyer_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          loan_id: string
+          notes?: string | null
+          notice_sent_at?: string | null
+          reserve_price?: number
+          sale_price?: number | null
+          status?: string
+          surplus_deficit?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          auction_date?: string | null
+          buyer_name?: string | null
+          buyer_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          loan_id?: string
+          notes?: string | null
+          notice_sent_at?: string | null
+          reserve_price?: number
+          sale_price?: number | null
+          status?: string
+          surplus_deficit?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auctions_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auctions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -321,6 +455,121 @@ export type Database = {
           },
           {
             foreignKeyName: "customers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forfeiture_sales: {
+        Row: {
+          buyer_name: string | null
+          buyer_phone: string | null
+          created_at: string
+          created_by: string | null
+          forfeiture_id: string
+          id: string
+          loan_id: string
+          principal: number
+          profit_loss: number
+          sale_price: number
+          sold_at: string
+          tenant_id: string
+        }
+        Insert: {
+          buyer_name?: string | null
+          buyer_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          forfeiture_id: string
+          id?: string
+          loan_id: string
+          principal?: number
+          profit_loss?: number
+          sale_price?: number
+          sold_at?: string
+          tenant_id: string
+        }
+        Update: {
+          buyer_name?: string | null
+          buyer_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          forfeiture_id?: string
+          id?: string
+          loan_id?: string
+          principal?: number
+          profit_loss?: number
+          sale_price?: number
+          sold_at?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forfeiture_sales_forfeiture_id_fkey"
+            columns: ["forfeiture_id"]
+            isOneToOne: false
+            referencedRelation: "forfeitures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forfeiture_sales_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forfeiture_sales_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forfeitures: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          forfeiture_date: string | null
+          id: string
+          loan_id: string
+          notes: string | null
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          forfeiture_date?: string | null
+          id?: string
+          loan_id: string
+          notes?: string | null
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          forfeiture_date?: string | null
+          id?: string
+          loan_id?: string
+          notes?: string | null
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forfeitures_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forfeitures_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"

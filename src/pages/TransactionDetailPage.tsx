@@ -15,6 +15,7 @@ import ChargeCollectionDialog from "@/components/ChargeCollectionDialog";
 import ClosureDialog from "@/components/ClosureDialog";
 import ReloanDialog from "@/components/ReloanDialog";
 import MarginRenewalDialog from "@/components/MarginRenewalDialog";
+import PartialReleaseDialog from "@/components/PartialReleaseDialog";
 import {
   ArrowLeft, IndianRupee, TrendingUp, Clock, FileText, Printer,
   RefreshCw, Download, CircleDot, CalendarDays
@@ -54,6 +55,7 @@ export default function TransactionDetailPage() {
   const [closureDialogOpen, setClosureDialogOpen] = useState(false);
   const [reloanDialogOpen, setReloanDialogOpen] = useState(false);
   const [marginRenewalOpen, setMarginRenewalOpen] = useState(false);
+  const [partialReleaseOpen, setPartialReleaseOpen] = useState(false);
 
   if (loanLoading) {
     return (
@@ -220,44 +222,59 @@ export default function TransactionDetailPage() {
           {pledgeItems.length === 0 ? (
             <Card><CardContent className="py-8 text-center text-muted-foreground">No items recorded</CardContent></Card>
           ) : (
-            <div className="border rounded-lg overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Item</TableHead>
-                    <TableHead>Metal</TableHead>
-                    <TableHead>Purity</TableHead>
-                    <TableHead className="text-right">Gross (g)</TableHead>
-                    <TableHead className="text-right">Net (g)</TableHead>
-                    <TableHead className="text-right">Rate/g</TableHead>
-                    <TableHead className="text-right">Value</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pledgeItems.map((item: any) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {item.photo_url && <img src={item.photo_url} className="h-8 w-8 rounded object-cover" />}
-                          <div>
-                            <p className="font-medium text-sm">{item.item_name}</p>
-                            {item.description && <p className="text-xs text-muted-foreground">{item.description}</p>}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={METAL_COLORS[item.metal_type] || ""}>{item.metal_type}</Badge>
-                      </TableCell>
-                      <TableCell className="text-sm">{item.purity_name || `${item.purity_percentage}%`}</TableCell>
-                      <TableCell className="text-right">{formatWeight(item.gross_weight)}</TableCell>
-                      <TableCell className="text-right font-medium">{formatWeight(item.net_weight)}</TableCell>
-                      <TableCell className="text-right">{formatINR(item.rate_per_gram)}</TableCell>
-                      <TableCell className="text-right font-bold">{formatINR(item.value)}</TableCell>
+            <>
+              {loan.status !== "closed" && (
+                <div className="flex justify-end mb-2">
+                  <Button size="sm" variant="outline" onClick={() => setPartialReleaseOpen(true)}>Partial Release</Button>
+                </div>
+              )}
+              <div className="border rounded-lg overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Item</TableHead>
+                      <TableHead>Metal</TableHead>
+                      <TableHead>Purity</TableHead>
+                      <TableHead className="text-right">Gross (g)</TableHead>
+                      <TableHead className="text-right">Net (g)</TableHead>
+                      <TableHead className="text-right">Rate/g</TableHead>
+                      <TableHead className="text-right">Value</TableHead>
+                      <TableHead>Status</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {pledgeItems.map((item: any) => (
+                      <TableRow key={item.id} className={item.is_released ? "opacity-50" : ""}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {item.photo_url && <img src={item.photo_url} className="h-8 w-8 rounded object-cover" />}
+                            <div>
+                              <p className="font-medium text-sm">{item.item_name}</p>
+                              {item.description && <p className="text-xs text-muted-foreground">{item.description}</p>}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={METAL_COLORS[item.metal_type] || ""}>{item.metal_type}</Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">{item.purity_name || `${item.purity_percentage}%`}</TableCell>
+                        <TableCell className="text-right">{formatWeight(item.gross_weight)}</TableCell>
+                        <TableCell className="text-right font-medium">{formatWeight(item.net_weight)}</TableCell>
+                        <TableCell className="text-right">{formatINR(item.rate_per_gram)}</TableCell>
+                        <TableCell className="text-right font-bold">{formatINR(item.value)}</TableCell>
+                        <TableCell>
+                          {item.is_released ? (
+                            <Badge variant="outline" className="bg-gray-100 text-gray-600">Released</Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-emerald-100 text-emerald-800">Pledged</Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </TabsContent>
 
@@ -384,6 +401,12 @@ export default function TransactionDetailPage() {
           loan={loan}
         />
       )}
+      <PartialReleaseDialog
+        open={partialReleaseOpen}
+        onOpenChange={setPartialReleaseOpen}
+        loan={loan}
+        pledgeItems={pledgeItems}
+      />
     </div>
   );
 }
