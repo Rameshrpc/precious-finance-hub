@@ -12,6 +12,7 @@ import DashboardHome from "./pages/DashboardHome";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import CustomersPage from "./pages/CustomersPage";
+import MastersPage from "./pages/MastersPage";
 import {
   TransactionsNewPage,
   TransactionsListPage,
@@ -70,6 +71,7 @@ const App = () => (
             <Route path="/communications/whatsapp" element={<WhatsAppInboxPage />} />
             <Route path="/communications/templates" element={<TemplatesPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/settings/masters" element={<MastersPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

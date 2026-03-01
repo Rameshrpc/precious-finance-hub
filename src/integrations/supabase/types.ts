@@ -14,6 +14,142 @@ export type Database = {
   }
   public: {
     Tables: {
+      agents: {
+        Row: {
+          branch_id: string | null
+          commission_rate: number
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          phone: string
+          tenant_id: string
+        }
+        Insert: {
+          branch_id?: string | null
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          phone: string
+          tenant_id: string
+        }
+        Update: {
+          branch_id?: string | null
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          phone?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agents_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agents_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      areas: {
+        Row: {
+          city: string
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          tenant_id: string
+        }
+        Insert: {
+          city?: string
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          tenant_id: string
+        }
+        Update: {
+          city?: string
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "areas_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_partners: {
+        Row: {
+          account_number: string | null
+          contact_person: string | null
+          created_at: string
+          credit_limit: number
+          id: string
+          ifsc: string | null
+          is_active: boolean
+          name: string
+          phone: string | null
+          rate: number
+          tenant_id: string
+        }
+        Insert: {
+          account_number?: string | null
+          contact_person?: string | null
+          created_at?: string
+          credit_limit?: number
+          id?: string
+          ifsc?: string | null
+          is_active?: boolean
+          name: string
+          phone?: string | null
+          rate?: number
+          tenant_id: string
+        }
+        Update: {
+          account_number?: string | null
+          contact_person?: string | null
+          created_at?: string
+          credit_limit?: number
+          id?: string
+          ifsc?: string | null
+          is_active?: boolean
+          name?: string
+          phone?: string | null
+          rate?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_partners_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       branches: {
         Row: {
           address: string | null
@@ -148,6 +284,189 @@ export type Database = {
           },
         ]
       }
+      item_groups: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          metal_type: string
+          name: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          metal_type?: string
+          name: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          metal_type?: string
+          name?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_groups_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      items: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          item_group_id: string
+          name: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          item_group_id: string
+          name: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          item_group_id?: string
+          name?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "items_item_group_id_fkey"
+            columns: ["item_group_id"]
+            isOneToOne: false
+            referencedRelation: "item_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loan_schemes: {
+        Row: {
+          allowed_metals: string[]
+          charge_label: string
+          created_at: string
+          gold_ltv_cap: number
+          grace_period_days: number
+          id: string
+          interest_type: string
+          is_active: boolean
+          name: string
+          overdue_rate: number
+          product_type: string
+          rate: number
+          silver_ltv_cap: number
+          tenant_id: string
+          tenure_months: number
+          updated_at: string
+        }
+        Insert: {
+          allowed_metals?: string[]
+          charge_label?: string
+          created_at?: string
+          gold_ltv_cap?: number
+          grace_period_days?: number
+          id?: string
+          interest_type?: string
+          is_active?: boolean
+          name: string
+          overdue_rate?: number
+          product_type: string
+          rate: number
+          silver_ltv_cap?: number
+          tenant_id: string
+          tenure_months?: number
+          updated_at?: string
+        }
+        Update: {
+          allowed_metals?: string[]
+          charge_label?: string
+          created_at?: string
+          gold_ltv_cap?: number
+          grace_period_days?: number
+          id?: string
+          interest_type?: string
+          is_active?: boolean
+          name?: string
+          overdue_rate?: number
+          product_type?: string
+          rate?: number
+          silver_ltv_cap?: number
+          tenant_id?: string
+          tenure_months?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_schemes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_rates: {
+        Row: {
+          created_at: string
+          gold_22k: number
+          gold_24k: number
+          id: string
+          rate_date: string
+          silver_per_kg: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          gold_22k?: number
+          gold_24k?: number
+          id?: string
+          rate_date?: string
+          silver_per_kg?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          gold_22k?: number
+          gold_24k?: number
+          id?: string
+          rate_date?: string
+          silver_per_kg?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_rates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           branch_id: string | null
@@ -183,6 +502,44 @@ export type Database = {
           },
           {
             foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purities: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          metal_type: string
+          name: string
+          percentage: number
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          metal_type?: string
+          name: string
+          percentage: number
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          metal_type?: string
+          name?: string
+          percentage?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purities_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
