@@ -36,10 +36,11 @@ import NPADashboardPage from "./pages/NPADashboardPage";
 import DPDTrackerPage from "./pages/DPDTrackerPage";
 import CollectionQueuePage from "./pages/CollectionQueuePage";
 import TelecallerPage from "./pages/TelecallerPage";
+import WhatsAppInboxPage from "./pages/WhatsAppInboxPage";
+import TemplatesManagerPage from "./pages/TemplatesManagerPage";
+import BorrowerPortalPage from "./pages/BorrowerPortalPage";
 import {
   TransactionsPipelinePage,
-  WhatsAppInboxPage,
-  TemplatesPage,
   SettingsPage,
 } from "./pages/PlaceholderPages";
 import CronStatusPage from "./pages/CronStatusPage";
@@ -58,6 +59,8 @@ const App = () => (
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
+          {/* Borrower Portal - separate layout */}
+          <Route path="/customer-portal" element={<BorrowerPortalPage />} />
           <Route
             element={
               <ProtectedRoute>
@@ -93,7 +96,7 @@ const App = () => (
             <Route path="/collection/queue" element={<CollectionQueuePage />} />
             <Route path="/collection/telecaller" element={<TelecallerPage />} />
             <Route path="/communications/whatsapp" element={<WhatsAppInboxPage />} />
-            <Route path="/communications/templates" element={<TemplatesPage />} />
+            <Route path="/communications/templates" element={<TemplatesManagerPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/settings/masters" element={<MastersPage />} />
             <Route path="/settings/cron-status" element={<CronStatusPage />} />

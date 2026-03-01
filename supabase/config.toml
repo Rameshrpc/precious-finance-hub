@@ -2,3 +2,9 @@ project_id = "oqyehjqduvnrvuckzqer"
 
 [functions.daily-cron]
 verify_jwt = false
+
+[functions.waha-session]
+verify_jwt = false
+
+[functions.waha-webhook]
+verify_jwt = false
