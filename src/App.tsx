@@ -73,7 +73,7 @@ const App = () => (
             <Route path="/transactions/los" element={<LOSPipelinePage />} />
             <Route path="/transactions/los/new" element={<NewApplicationPage />} />
             <Route path="/vault" element={<VaultPage />} />
-            <Route path="/accounting/vouchers" element={<VouchersPage />} />
+            <Route path="/accounting/vouchers" element={<ManualVoucherPage />} />
             <Route path="/accounting/daybook" element={<DayBookPage />} />
             <Route path="/accounting/ledger" element={<LedgerPage />} />
             <Route path="/accounting/trial-balance" element={<TrialBalancePage />} />
