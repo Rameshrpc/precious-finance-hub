@@ -550,6 +550,151 @@ export type Database = {
           },
         ]
       }
+      loans: {
+        Row: {
+          agent_id: string | null
+          amount: number
+          branch_id: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          disbursement_account: string | null
+          disbursement_bank_name: string | null
+          disbursement_cheque_no: string | null
+          disbursement_ifsc: string | null
+          disbursement_mode: string
+          disbursement_upi_id: string | null
+          gold_ltv: number
+          gold_value: number
+          id: string
+          loan_application_id: string | null
+          loan_number: string
+          maturity_date: string | null
+          notes: string | null
+          overall_ltv: number
+          product_type: string
+          purpose: string | null
+          rate: number
+          scheme_id: string | null
+          silver_ltv: number
+          silver_value: number
+          status: string
+          tenant_id: string
+          tenure_months: number
+          total_pledge_value: number
+          updated_at: string
+        }
+        Insert: {
+          agent_id?: string | null
+          amount?: number
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          disbursement_account?: string | null
+          disbursement_bank_name?: string | null
+          disbursement_cheque_no?: string | null
+          disbursement_ifsc?: string | null
+          disbursement_mode?: string
+          disbursement_upi_id?: string | null
+          gold_ltv?: number
+          gold_value?: number
+          id?: string
+          loan_application_id?: string | null
+          loan_number: string
+          maturity_date?: string | null
+          notes?: string | null
+          overall_ltv?: number
+          product_type: string
+          purpose?: string | null
+          rate?: number
+          scheme_id?: string | null
+          silver_ltv?: number
+          silver_value?: number
+          status?: string
+          tenant_id: string
+          tenure_months?: number
+          total_pledge_value?: number
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string | null
+          amount?: number
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          disbursement_account?: string | null
+          disbursement_bank_name?: string | null
+          disbursement_cheque_no?: string | null
+          disbursement_ifsc?: string | null
+          disbursement_mode?: string
+          disbursement_upi_id?: string | null
+          gold_ltv?: number
+          gold_value?: number
+          id?: string
+          loan_application_id?: string | null
+          loan_number?: string
+          maturity_date?: string | null
+          notes?: string | null
+          overall_ltv?: number
+          product_type?: string
+          purpose?: string | null
+          rate?: number
+          scheme_id?: string | null
+          silver_ltv?: number
+          silver_value?: number
+          status?: string
+          tenant_id?: string
+          tenure_months?: number
+          total_pledge_value?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loans_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loans_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loans_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loans_loan_application_id_fkey"
+            columns: ["loan_application_id"]
+            isOneToOne: false
+            referencedRelation: "loan_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loans_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "loan_schemes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loans_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_rates: {
         Row: {
           created_at: string
@@ -584,6 +729,95 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "market_rates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pledge_items: {
+        Row: {
+          created_at: string
+          deduction: number
+          description: string | null
+          gross_weight: number
+          id: string
+          item_id: string | null
+          item_name: string
+          loan_id: string
+          metal_type: string
+          net_weight: number
+          photo_url: string | null
+          purity_id: string | null
+          purity_name: string | null
+          purity_percentage: number
+          rate_per_gram: number
+          tenant_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          deduction?: number
+          description?: string | null
+          gross_weight?: number
+          id?: string
+          item_id?: string | null
+          item_name: string
+          loan_id: string
+          metal_type?: string
+          net_weight?: number
+          photo_url?: string | null
+          purity_id?: string | null
+          purity_name?: string | null
+          purity_percentage?: number
+          rate_per_gram?: number
+          tenant_id: string
+          value?: number
+        }
+        Update: {
+          created_at?: string
+          deduction?: number
+          description?: string | null
+          gross_weight?: number
+          id?: string
+          item_id?: string | null
+          item_name?: string
+          loan_id?: string
+          metal_type?: string
+          net_weight?: number
+          photo_url?: string | null
+          purity_id?: string | null
+          purity_name?: string | null
+          purity_percentage?: number
+          rate_per_gram?: number
+          tenant_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pledge_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pledge_items_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pledge_items_purity_id_fkey"
+            columns: ["purity_id"]
+            isOneToOne: false
+            referencedRelation: "purities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pledge_items_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -724,6 +958,10 @@ export type Database = {
       }
       generate_customer_code: {
         Args: { p_branch_id: string; p_tenant_id: string }
+        Returns: string
+      }
+      generate_next_number: {
+        Args: { p_prefix: string; p_tenant_id: string }
         Returns: string
       }
       get_user_tenant_id: { Args: { _user_id: string }; Returns: string }
