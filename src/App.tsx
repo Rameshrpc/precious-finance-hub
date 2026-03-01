@@ -39,6 +39,13 @@ import TelecallerPage from "./pages/TelecallerPage";
 import WhatsAppInboxPage from "./pages/WhatsAppInboxPage";
 import TemplatesManagerPage from "./pages/TemplatesManagerPage";
 import BorrowerPortalPage from "./pages/BorrowerPortalPage";
+import GrievancePage from "./pages/GrievancePage";
+import CashManagementPage from "./pages/CashManagementPage";
+import SecuritySettingsPage from "./pages/SecuritySettingsPage";
+import ApiKeysPage from "./pages/ApiKeysPage";
+import GlobalSearch from "./components/GlobalSearch";
+import KeyboardShortcuts from "./components/KeyboardShortcuts";
+import SessionTimeoutWarning from "./components/SessionTimeoutWarning";
 import {
   TransactionsPipelinePage,
   SettingsPage,
@@ -53,6 +60,9 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <GlobalSearch />
+        <KeyboardShortcuts />
+        <SessionTimeoutWarning />
         <Routes>
           <Route path="/" element={<Auth />} />
           <Route path="/auth" element={<Auth />} />
@@ -88,6 +98,7 @@ const App = () => (
             <Route path="/accounting/trial-balance" element={<TrialBalancePage />} />
             <Route path="/accounting/pnl" element={<PnLPage />} />
             <Route path="/accounting/balance-sheet" element={<BalanceSheetPage />} />
+            <Route path="/accounting/cash" element={<CashManagementPage />} />
             <Route path="/reports" element={<ReportsHubPage />} />
             <Route path="/approvals" element={<ApprovalsPage />} />
             <Route path="/collection" element={<CollectionQueuePage />} />
@@ -95,11 +106,14 @@ const App = () => (
             <Route path="/collection/dpd" element={<DPDTrackerPage />} />
             <Route path="/collection/queue" element={<CollectionQueuePage />} />
             <Route path="/collection/telecaller" element={<TelecallerPage />} />
+            <Route path="/collection/grievance" element={<GrievancePage />} />
             <Route path="/communications/whatsapp" element={<WhatsAppInboxPage />} />
             <Route path="/communications/templates" element={<TemplatesManagerPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/settings/masters" element={<MastersPage />} />
             <Route path="/settings/cron-status" element={<CronStatusPage />} />
+            <Route path="/settings/security" element={<SecuritySettingsPage />} />
+            <Route path="/settings/api-keys" element={<ApiKeysPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
