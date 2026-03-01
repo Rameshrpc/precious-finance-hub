@@ -487,6 +487,62 @@ export type Database = {
           },
         ]
       }
+      cron_runs: {
+        Row: {
+          charges_accrued: number
+          completed_at: string | null
+          error_details: Json | null
+          errors: number
+          id: string
+          loans_updated: number
+          overdue_marked: number
+          run_type: string
+          started_at: string
+          status: string
+          summary: Json | null
+          tenant_id: string
+          triggered_by: string | null
+        }
+        Insert: {
+          charges_accrued?: number
+          completed_at?: string | null
+          error_details?: Json | null
+          errors?: number
+          id?: string
+          loans_updated?: number
+          overdue_marked?: number
+          run_type?: string
+          started_at?: string
+          status?: string
+          summary?: Json | null
+          tenant_id: string
+          triggered_by?: string | null
+        }
+        Update: {
+          charges_accrued?: number
+          completed_at?: string | null
+          error_details?: Json | null
+          errors?: number
+          id?: string
+          loans_updated?: number
+          overdue_marked?: number
+          run_type?: string
+          started_at?: string
+          status?: string
+          summary?: Json | null
+          tenant_id?: string
+          triggered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cron_runs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           aadhaar: string | null
