@@ -80,8 +80,16 @@ const menuItems: NavItem[] = [
       { label: "Templates", path: "/communications/templates", icon: FileText },
     ],
   },
+  { label: "Help Center", path: "/help", icon: BookOpen },
   { label: "Settings", path: "/settings", icon: Settings },
-  { label: "Super Admin", path: "/admin", icon: Settings },
+  {
+    label: "Super Admin",
+    icon: Settings,
+    children: [
+      { label: "Admin Panel", path: "/admin", icon: Settings },
+      { label: "Test Checklist", path: "/admin/test-checklist", icon: CheckSquare },
+    ],
+  },
 ];
 
 const AppSidebar = () => {
