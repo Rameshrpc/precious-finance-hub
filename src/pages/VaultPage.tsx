@@ -515,12 +515,12 @@ function CreatePacketDialog({ open, onOpenChange, loans, slots, tenantId, userId
     mutationFn: async () => {
       if (selectedLoans.size === 0) throw new Error("Select at least one loan");
       const packetNumber = `PKT${Date.now().toString().slice(-6)}`;
-      const { data: pkt, error: pktErr } = await supabase.from("vault_packets").insert({ tenant_id: tenantId!, packet_number: packetNumber, slot_id: slotId || null, gold_weight: goldW, silver_weight: silverW, total_principal: totalP, loans_count: selectedLoans.size, created_by: userId }).select().single();
+      const { data: pkt, error: pktErr } = await supabase.from("vault_packets").insert({ tenant_id: tenantId!, packet_number: packetNumber, slot_id: slotId && slotId !== "none" ? slotId : null, gold_weight: goldW, silver_weight: silverW, total_principal: totalP, loans_count: selectedLoans.size, created_by: userId }).select().single();
       if (pktErr) throw pktErr;
       const junctionRows = Array.from(selectedLoans).map((loanId) => ({ packet_id: pkt.id, loan_id: loanId }));
       const { error: jErr } = await supabase.from("vault_packet_loans").insert(junctionRows);
       if (jErr) throw jErr;
-      if (slotId) await supabase.from("vault_slots").update({ is_occupied: true, packet_id: pkt.id }).eq("id", slotId);
+      if (slotId && slotId !== "none") await supabase.from("vault_slots").update({ is_occupied: true, packet_id: pkt.id }).eq("id", slotId);
       return packetNumber;
     },
     onSuccess: (pn) => {
@@ -561,7 +561,7 @@ function CreatePacketDialog({ open, onOpenChange, loans, slots, tenantId, userId
         <div><Label className="text-xs">Assign Vault Slot (optional)</Label>
           <Select value={slotId} onValueChange={setSlotId}>
             <SelectTrigger><SelectValue placeholder="Select available slot" /></SelectTrigger>
-            <SelectContent><SelectItem value="">None</SelectItem>{slots.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.slot_name} ({s.slot_size})</SelectItem>)}</SelectContent>
+            <SelectContent><SelectItem value="none">None</SelectItem>{slots.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.slot_name} ({s.slot_size})</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <Button className="w-full gap-2" disabled={selectedLoans.size === 0 || createMutation.isPending} onClick={() => createMutation.mutate()}>
