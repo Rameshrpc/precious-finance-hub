@@ -54,6 +54,7 @@ import SuperAdminPage from "./pages/SuperAdminPage";
 import CronStatusPage from "./pages/CronStatusPage";
 import TestChecklistPage from "./pages/TestChecklistPage";
 import HelpCenterPage from "./pages/HelpCenterPage";
+import NotificationsPage from "./pages/NotificationsPage";
 import WhatsNewDialog from "./components/WhatsNewDialog";
 
 const queryClient = new QueryClient();
@@ -106,6 +107,7 @@ const App = () => (
             <Route path="/accounting/balance-sheet" element={<BalanceSheetPage />} />
             <Route path="/accounting/cash" element={<CashManagementPage />} />
             <Route path="/reports" element={<ReportsHubPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/approvals" element={<ApprovalsPage />} />
             <Route path="/collection" element={<CollectionQueuePage />} />
             <Route path="/collection/npa" element={<NPADashboardPage />} />
