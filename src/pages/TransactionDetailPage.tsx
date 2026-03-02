@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLoanDetail } from "@/hooks/useLoans";
+import { useLabels } from "@/lib/labels";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { formatINR, formatWeight, formatDate } from "@/lib/formatters";
-import { getLabel } from "@/lib/labels";
+import CustomerQuickCard from "@/components/CustomerQuickCard";
 import ChargeCollectionDialog from "@/components/ChargeCollectionDialog";
 import ClosureDialog from "@/components/ClosureDialog";
 import ReloanDialog from "@/components/ReloanDialog";
@@ -19,33 +20,30 @@ import PartialReleaseDialog from "@/components/PartialReleaseDialog";
 import LoanRestructureDialog from "@/components/LoanRestructureDialog";
 import {
   ArrowLeft, IndianRupee, TrendingUp, Clock, FileText, Printer,
-  RefreshCw, Download, CircleDot, CalendarDays, Wrench
+  RefreshCw, Download, CircleDot, CalendarDays, Wrench, Phone
 } from "lucide-react";
 import { differenceInDays } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const STATUS_COLORS: Record<string, string> = {
-  active: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  overdue: "bg-red-100 text-red-800 border-red-200",
-  matured: "bg-orange-100 text-orange-800 border-orange-200",
-  closed: "bg-gray-100 text-gray-600 border-gray-200",
+  active: "bg-[hsl(142,70%,45%,0.15)] text-[hsl(142,70%,35%)] border-[hsl(142,70%,45%,0.3)]",
+  overdue: "bg-destructive/15 text-destructive border-destructive/30",
+  matured: "bg-[hsl(30,90%,50%,0.15)] text-[hsl(30,90%,40%)] border-[hsl(30,90%,50%,0.3)]",
+  closed: "bg-muted text-muted-foreground border-border",
+  pending: "bg-primary/15 text-primary border-primary/30",
 };
 
 const PRODUCT_COLORS: Record<string, string> = {
-  GL: "bg-amber-100 text-amber-800 border-amber-200",
-  PO: "bg-blue-100 text-blue-800 border-blue-200",
-  SA: "bg-purple-100 text-purple-800 border-purple-200",
-};
-
-const METAL_COLORS: Record<string, string> = {
-  gold: "bg-amber-100 text-amber-800",
-  silver: "bg-slate-100 text-slate-700",
+  GL: "bg-accent/15 text-accent border-accent/30",
+  PO: "bg-primary/15 text-primary border-primary/30",
+  SA: "bg-[hsl(270,60%,55%,0.15)] text-[hsl(270,60%,45%)] border-[hsl(270,60%,55%,0.3)]",
 };
 
 const CHARGE_STATUS_COLORS: Record<string, string> = {
-  pending: "bg-orange-100 text-orange-800",
-  paid: "bg-emerald-100 text-emerald-800",
-  overdue: "bg-red-100 text-red-800",
-  partial: "bg-yellow-100 text-yellow-800",
+  pending: "bg-[hsl(30,90%,50%,0.15)] text-[hsl(30,90%,40%)]",
+  paid: "bg-[hsl(142,70%,45%,0.15)] text-[hsl(142,70%,35%)]",
+  overdue: "bg-destructive/15 text-destructive",
+  partial: "bg-[hsl(45,90%,50%,0.15)] text-[hsl(45,90%,35%)]",
 };
 
 export default function TransactionDetailPage() {
@@ -58,6 +56,22 @@ export default function TransactionDetailPage() {
   const [marginRenewalOpen, setMarginRenewalOpen] = useState(false);
   const [partialReleaseOpen, setPartialReleaseOpen] = useState(false);
   const [restructureOpen, setRestructureOpen] = useState(false);
+
+  const labels = useLabels(loan?.product_type || "GL");
+
+  // Metal summary from pledge items
+  const metalSummary = useMemo(() => {
+    const gold = { count: 0, weight: 0, value: 0 };
+    const silver = { count: 0, weight: 0, value: 0 };
+    (pledgeItems || []).forEach((item: any) => {
+      if (item.is_released) return;
+      const bucket = item.metal_type === "silver" ? silver : gold;
+      bucket.count++;
+      bucket.weight += Number(item.net_weight) || 0;
+      bucket.value += Number(item.value) || 0;
+    });
+    return { gold, silver };
+  }, [pledgeItems]);
 
   if (loanLoading) {
     return (
@@ -82,8 +96,7 @@ export default function TransactionDetailPage() {
   const totalInterestDue = interestRecords.reduce((s: number, r: any) => s + Number(r.amount) + Number(r.penalty), 0);
   const totalInterestPaid = interestRecords.reduce((s: number, r: any) => s + Number(r.paid), 0);
   const outstanding = totalInterestDue - totalInterestPaid;
-  const ltvPercent = Math.min(loan.overall_ltv, 100);
-  const ltvColor = ltvPercent > 80 ? "bg-red-500" : ltvPercent > 60 ? "bg-yellow-500" : "bg-emerald-500";
+  const ltvPercent = Math.min(Number(loan.overall_ltv) || 0, 100);
 
   return (
     <div className="space-y-5">
@@ -92,36 +105,38 @@ export default function TransactionDetailPage() {
         <Button variant="ghost" size="icon" onClick={() => navigate("/transactions")}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-2xl font-bold font-serif">{loan.loan_number}</h1>
+        <h1 className="text-2xl font-bold font-mono tracking-tight">{loan.loan_number}</h1>
         <Badge variant="outline" className={STATUS_COLORS[loan.status] || ""}>{loan.status}</Badge>
         <Badge variant="outline" className={PRODUCT_COLORS[loan.product_type] || ""}>
-          {getLabel(loan.product_type, "product")}
+          {labels.product}
         </Badge>
         <div className="ml-auto flex gap-2 flex-wrap">
           <Button size="sm" variant="outline" className="gap-1" onClick={() => setChargeDialogOpen(true)} disabled={loan.status === "closed"}>
-            <IndianRupee className="h-3.5 w-3.5" />Collect {getLabel(loan.product_type, "charge")}
+            <IndianRupee className="h-3.5 w-3.5" />Collect {labels.charge}
+          </Button>
+          <Button size="sm" variant="outline" className="gap-1" onClick={() => setClosureDialogOpen(true)} disabled={loan.status === "closed"}>
+            {labels.closeVerb}
           </Button>
           <Button size="sm" variant="outline" className="gap-1" onClick={() => setReloanDialogOpen(true)} disabled={loan.status === "closed"}>
             <RefreshCw className="h-3.5 w-3.5" />Reloan
-          </Button>
-          {loan.product_type === "SA" && (
-            <Button size="sm" variant="outline" className="gap-1" onClick={() => setMarginRenewalOpen(true)} disabled={loan.status === "closed"}>
-              <CalendarDays className="h-3.5 w-3.5" />Margin Renewal
-            </Button>
-          )}
-          <Button size="sm" variant="outline" className="gap-1" onClick={() => setRestructureOpen(true)} disabled={loan.status === "closed"}>
-            <Wrench className="h-3.5 w-3.5" />Restructure
-          </Button>
-          <Button size="sm" variant="destructive" className="gap-1" onClick={() => setClosureDialogOpen(true)} disabled={loan.status === "closed"}>
-            {getLabel(loan.product_type, "closeVerb")}
           </Button>
           <Button size="sm" variant="outline" className="gap-1"><Printer className="h-3.5 w-3.5" />Print</Button>
         </div>
       </div>
 
-      {/* Customer info */}
-      <div className="text-sm text-muted-foreground">
-        Customer: <span className="font-medium text-foreground">{loan.customer?.name}</span> · {loan.customer?.phone}
+      {/* Customer line with QuickCard */}
+      <div className="flex items-center gap-2 text-sm">
+        <span className="text-muted-foreground">Customer:</span>
+        {loan.customer ? (
+          <CustomerQuickCard customerId={loan.customer_id}>
+            <span className="font-medium text-foreground cursor-pointer hover:text-accent transition-colors">{loan.customer.name}</span>
+          </CustomerQuickCard>
+        ) : <span>—</span>}
+        {loan.customer?.phone && (
+          <a href={`tel:${loan.customer.phone}`} className="flex items-center gap-1 text-muted-foreground hover:text-accent transition-colors">
+            <Phone className="h-3 w-3" />{loan.customer.phone}
+          </a>
+        )}
       </div>
 
       {/* 4 Metric Cards */}
@@ -134,19 +149,18 @@ export default function TransactionDetailPage() {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground mb-1">{getLabel(loan.product_type, "charge")} Outstanding</p>
-            <p className="text-xl font-bold">{formatINR(outstanding)}</p>
+            <p className="text-xs text-muted-foreground mb-1">{labels.charge} Outstanding</p>
+            <p className={cn("text-xl font-bold", outstanding > 0 && "text-destructive")}>{formatINR(outstanding)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground mb-1">LTV</p>
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-bold">{loan.overall_ltv}%</span>
-            </div>
-            <div className="mt-2 h-2 w-full rounded-full bg-secondary overflow-hidden">
-              <div className={`h-full rounded-full transition-all ${ltvColor}`} style={{ width: `${ltvPercent}%` }} />
-            </div>
+            <p className="text-xl font-bold">{Number(loan.overall_ltv).toFixed(1)}%</p>
+            <Progress
+              value={ltvPercent}
+              className={cn("mt-2 h-2", ltvPercent > 80 ? "[&>div]:bg-destructive" : ltvPercent > 60 ? "[&>div]:bg-[hsl(var(--warning))]" : "[&>div]:bg-[hsl(var(--success))]")}
+            />
           </CardContent>
         </Card>
         <Card>
@@ -163,7 +177,7 @@ export default function TransactionDetailPage() {
         <TabsList className="w-full justify-start">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="items">Items ({pledgeItems.length})</TabsTrigger>
-          <TabsTrigger value="charges">{getLabel(loan.product_type, "charge")}s ({interestRecords.length})</TabsTrigger>
+          <TabsTrigger value="charges">{labels.charge}s ({interestRecords.length})</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="audit">Audit Trail</TabsTrigger>
         </TabsList>
@@ -174,51 +188,63 @@ export default function TransactionDetailPage() {
             <Card>
               <CardHeader className="pb-3"><CardTitle className="text-base">Loan Details</CardTitle></CardHeader>
               <CardContent className="space-y-2 text-sm">
-                <Row label="Product" value={getLabel(loan.product_type, "product")} />
-                <Row label="Amount" value={formatINR(loan.amount)} />
-                <Row label="Rate" value={`${loan.rate}% p.m.`} />
+                <Row label="Product" value={labels.product} />
+                <Row label={labels.amount} value={formatINR(loan.amount)} />
+                <Row label={labels.chargeRate} value={`${loan.rate}% p.m.`} />
                 <Row label="Tenure" value={`${loan.tenure_months} months`} />
-                <Row label="Maturity" value={loan.maturity_date ? formatDate(loan.maturity_date) : "-"} />
+                <Row label="Maturity" value={loan.maturity_date ? formatDate(loan.maturity_date) : "—"} />
+                <Row label="Disbursement" value={loan.disbursement_mode} />
                 <Row label="Created" value={formatDate(loan.created_at)} />
                 {loan.purpose && <Row label="Purpose" value={loan.purpose} />}
               </CardContent>
             </Card>
+
+            {/* Metal Summary */}
             <Card>
-              <CardHeader className="pb-3"><CardTitle className="text-base">Scheme & Disbursement</CardTitle></CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <Row label="Scheme" value={scheme?.name || "-"} />
-                <Row label={`${getLabel(loan.product_type, "charge")} Type`} value={scheme?.interest_type || "-"} />
-                <Row label="Gold LTV Cap" value={scheme ? `${scheme.gold_ltv_cap}%` : "-"} />
-                <Row label="Silver LTV Cap" value={scheme ? `${scheme.silver_ltv_cap}%` : "-"} />
-                <Separator />
-                <Row label="Mode" value={loan.disbursement_mode} />
-                {loan.disbursement_bank_name && <Row label="Bank" value={loan.disbursement_bank_name} />}
-                {loan.disbursement_account && <Row label="Account" value={loan.disbursement_account} />}
-                {loan.disbursement_upi_id && <Row label="UPI" value={loan.disbursement_upi_id} />}
-              </CardContent>
-            </Card>
-            <Card className="md:col-span-2">
               <CardHeader className="pb-3"><CardTitle className="text-base">Metal Summary</CardTitle></CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Gold Value</p>
-                    <p className="text-lg font-bold">{formatINR(loan.gold_value)}</p>
-                    <p className="text-xs text-muted-foreground">LTV {loan.gold_ltv}%</p>
+              <CardContent className="space-y-3">
+                {metalSummary.gold.count > 0 && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-accent/10">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-accent text-accent-foreground">Gold</Badge>
+                      <span className="text-sm">{metalSummary.gold.count} items · {formatWeight(metalSummary.gold.weight)}</span>
+                    </div>
+                    <span className="font-bold text-sm">{formatINR(metalSummary.gold.value)}</span>
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Silver Value</p>
-                    <p className="text-lg font-bold">{formatINR(loan.silver_value)}</p>
-                    <p className="text-xs text-muted-foreground">LTV {loan.silver_ltv}%</p>
+                )}
+                {metalSummary.silver.count > 0 && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">Silver</Badge>
+                      <span className="text-sm">{metalSummary.silver.count} items · {formatWeight(metalSummary.silver.weight)}</span>
+                    </div>
+                    <span className="font-bold text-sm">{formatINR(metalSummary.silver.value)}</span>
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Total Pledge</p>
-                    <p className="text-lg font-bold">{formatINR(loan.total_pledge_value)}</p>
-                    <p className="text-xs text-muted-foreground">Overall LTV {loan.overall_ltv}%</p>
-                  </div>
+                )}
+                <Separator />
+                <div className="grid grid-cols-3 gap-3 text-center text-sm">
+                  <div><p className="text-xs text-muted-foreground">Gold LTV</p><p className="font-bold">{Number(loan.gold_ltv).toFixed(1)}%</p></div>
+                  <div><p className="text-xs text-muted-foreground">Silver LTV</p><p className="font-bold">{Number(loan.silver_ltv).toFixed(1)}%</p></div>
+                  <div><p className="text-xs text-muted-foreground">Total Pledge</p><p className="font-bold">{formatINR(loan.total_pledge_value)}</p></div>
                 </div>
               </CardContent>
             </Card>
+
+            {/* Scheme */}
+            {scheme && (
+              <Card className="md:col-span-2">
+                <CardHeader className="pb-3"><CardTitle className="text-base">Scheme & Disbursement</CardTitle></CardHeader>
+                <CardContent className="space-y-2 text-sm">
+                  <Row label="Scheme" value={scheme.name} />
+                  <Row label={`${labels.charge} Type`} value={scheme.interest_type} />
+                  <Row label="Gold LTV Cap" value={`${scheme.gold_ltv_cap}%`} />
+                  <Row label="Silver LTV Cap" value={`${scheme.silver_ltv_cap}%`} />
+                  {loan.disbursement_bank_name && <Row label="Bank" value={loan.disbursement_bank_name} />}
+                  {loan.disbursement_account && <Row label="Account" value={loan.disbursement_account} />}
+                  {loan.disbursement_upi_id && <Row label="UPI" value={loan.disbursement_upi_id} />}
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TabsContent>
 
@@ -252,15 +278,15 @@ export default function TransactionDetailPage() {
                       <TableRow key={item.id} className={item.is_released ? "opacity-50" : ""}>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            {item.photo_url && <img src={item.photo_url} className="h-8 w-8 rounded object-cover" />}
+                            {item.photo_url && <img src={item.photo_url} className="h-8 w-8 rounded object-cover" alt="" />}
                             <div>
-                              <p className="font-medium text-sm">{item.item_name}</p>
+                              <p className={cn("font-medium text-sm", item.is_released && "line-through")}>{item.item_name}</p>
                               {item.description && <p className="text-xs text-muted-foreground">{item.description}</p>}
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={METAL_COLORS[item.metal_type] || ""}>{item.metal_type}</Badge>
+                          <Badge variant="outline" className={item.metal_type === "gold" ? "border-accent/30 text-accent" : ""}>{item.metal_type}</Badge>
                         </TableCell>
                         <TableCell className="text-sm">{item.purity_name || `${item.purity_percentage}%`}</TableCell>
                         <TableCell className="text-right">{formatWeight(item.gross_weight)}</TableCell>
@@ -269,9 +295,9 @@ export default function TransactionDetailPage() {
                         <TableCell className="text-right font-bold">{formatINR(item.value)}</TableCell>
                         <TableCell>
                           {item.is_released ? (
-                            <Badge variant="outline" className="bg-gray-100 text-gray-600">Released</Badge>
+                            <Badge variant="outline" className="bg-muted text-muted-foreground">Released</Badge>
                           ) : (
-                            <Badge variant="outline" className="bg-emerald-100 text-emerald-800">Pledged</Badge>
+                            <Badge variant="outline" className="bg-[hsl(142,70%,45%,0.15)] text-[hsl(142,70%,35%)]">Pledged</Badge>
                           )}
                         </TableCell>
                       </TableRow>
@@ -286,7 +312,7 @@ export default function TransactionDetailPage() {
         {/* CHARGES */}
         <TabsContent value="charges" className="mt-4 space-y-4">
           {interestRecords.length === 0 ? (
-            <Card><CardContent className="py-8 text-center text-muted-foreground">No {getLabel(loan.product_type, "charge").toLowerCase()} records yet</CardContent></Card>
+            <Card><CardContent className="py-8 text-center text-muted-foreground">No {labels.charge.toLowerCase()} records yet</CardContent></Card>
           ) : (
             <>
               <div className="border rounded-lg overflow-auto">
@@ -306,22 +332,21 @@ export default function TransactionDetailPage() {
                   <TableBody>
                     {interestRecords.map((rec: any) => (
                       <TableRow key={rec.id}>
-                        <TableCell className="text-sm">{formatDate(rec.period_start)} - {formatDate(rec.period_end)}</TableCell>
+                        <TableCell className="text-sm">{formatDate(rec.period_start)} – {formatDate(rec.period_end)}</TableCell>
                         <TableCell className="text-sm">{formatDate(rec.due_date)}</TableCell>
                         <TableCell className="text-right font-medium">{formatINR(rec.amount)}</TableCell>
                         <TableCell className="text-right">{formatINR(rec.paid)}</TableCell>
-                        <TableCell className="text-right">{rec.penalty > 0 ? formatINR(rec.penalty) : "-"}</TableCell>
+                        <TableCell className="text-right">{rec.penalty > 0 ? formatINR(rec.penalty) : "—"}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className={CHARGE_STATUS_COLORS[rec.status] || ""}>{rec.status}</Badge>
                         </TableCell>
-                        <TableCell className="text-sm font-mono">{rec.receipt_number || "-"}</TableCell>
-                        <TableCell className="text-sm">{rec.payment_date ? formatDate(rec.payment_date) : "-"}</TableCell>
+                        <TableCell className="text-sm font-mono">{rec.receipt_number || "—"}</TableCell>
+                        <TableCell className="text-sm">{rec.payment_date ? formatDate(rec.payment_date) : "—"}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </div>
-              {/* Summary */}
               <div className="grid grid-cols-3 gap-3">
                 <Card><CardContent className="p-4 text-center">
                   <p className="text-xs text-muted-foreground">Total Due</p>
@@ -329,11 +354,11 @@ export default function TransactionDetailPage() {
                 </CardContent></Card>
                 <Card><CardContent className="p-4 text-center">
                   <p className="text-xs text-muted-foreground">Total Paid</p>
-                  <p className="text-lg font-bold text-emerald-600">{formatINR(totalInterestPaid)}</p>
+                  <p className="text-lg font-bold text-[hsl(142,70%,35%)]">{formatINR(totalInterestPaid)}</p>
                 </CardContent></Card>
                 <Card><CardContent className="p-4 text-center">
                   <p className="text-xs text-muted-foreground">Outstanding</p>
-                  <p className="text-lg font-bold text-red-600">{formatINR(outstanding)}</p>
+                  <p className="text-lg font-bold text-destructive">{formatINR(outstanding)}</p>
                 </CardContent></Card>
               </div>
             </>
@@ -346,7 +371,7 @@ export default function TransactionDetailPage() {
             <CardContent className="py-8 text-center text-muted-foreground">
               <FileText className="mx-auto h-8 w-8 mb-2 opacity-40" />
               <p>Document generation coming soon</p>
-              <p className="text-xs mt-1">Pledge Card, Receipts, and Closure documents will be generated here</p>
+              <p className="text-xs mt-1">{labels.document}, Receipts, and {labels.close} documents will appear here</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -379,44 +404,12 @@ export default function TransactionDetailPage() {
       </Tabs>
 
       {/* Dialogs */}
-      <ChargeCollectionDialog
-        open={chargeDialogOpen}
-        onOpenChange={setChargeDialogOpen}
-        loan={loan}
-        interestRecords={interestRecords}
-      />
-      <ClosureDialog
-        open={closureDialogOpen}
-        onOpenChange={setClosureDialogOpen}
-        loan={loan}
-        pledgeItems={pledgeItems}
-        interestRecords={interestRecords}
-      />
-      <ReloanDialog
-        open={reloanDialogOpen}
-        onOpenChange={setReloanDialogOpen}
-        loan={loan}
-        pledgeItems={pledgeItems}
-        interestRecords={interestRecords}
-      />
-      {loan.product_type === "SA" && (
-        <MarginRenewalDialog
-          open={marginRenewalOpen}
-          onOpenChange={setMarginRenewalOpen}
-          loan={loan}
-        />
-      )}
-      <PartialReleaseDialog
-        open={partialReleaseOpen}
-        onOpenChange={setPartialReleaseOpen}
-        loan={loan}
-        pledgeItems={pledgeItems}
-      />
-      <LoanRestructureDialog
-        open={restructureOpen}
-        onOpenChange={setRestructureOpen}
-        loan={loan}
-      />
+      <ChargeCollectionDialog open={chargeDialogOpen} onOpenChange={setChargeDialogOpen} loan={loan} interestRecords={interestRecords} />
+      <ClosureDialog open={closureDialogOpen} onOpenChange={setClosureDialogOpen} loan={loan} pledgeItems={pledgeItems} interestRecords={interestRecords} />
+      <ReloanDialog open={reloanDialogOpen} onOpenChange={setReloanDialogOpen} loan={loan} pledgeItems={pledgeItems} interestRecords={interestRecords} />
+      {loan.product_type === "SA" && <MarginRenewalDialog open={marginRenewalOpen} onOpenChange={setMarginRenewalOpen} loan={loan} />}
+      <PartialReleaseDialog open={partialReleaseOpen} onOpenChange={setPartialReleaseOpen} loan={loan} pledgeItems={pledgeItems} />
+      <LoanRestructureDialog open={restructureOpen} onOpenChange={setRestructureOpen} loan={loan} />
     </div>
   );
 }
