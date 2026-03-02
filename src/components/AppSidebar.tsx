@@ -27,8 +27,13 @@ import {
   ChevronDown,
   ChevronRight as ChevronSubRight,
   Banknote,
-  ShoppingCart,
-  Handshake,
+  Landmark,
+  Bell,
+  Gavel,
+  Layers,
+  Building2,
+  UserCog,
+  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -44,45 +49,58 @@ interface NavItem {
   label: string;
   path?: string;
   icon: React.ElementType;
-  /** Only show if ALL listed products are enabled. Empty = always show. */
   requireProducts?: string[];
   children?: (NavItem & { path: string })[];
 }
 
-const menuItems: NavItem[] = [
-  { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-  { label: "Customers", path: "/customers", icon: Users },
+interface NavGroup {
+  title: string;
+  items: NavItem[];
+}
+
+const navGroups: NavGroup[] = [
   {
-    label: "Transactions",
-    icon: Receipt,
-    children: [
-      { label: "New Transaction", path: "/transactions/new", icon: FilePlus },
-      { label: "All Transactions", path: "/transactions", icon: List },
+    title: "MAIN",
+    items: [
+      { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+      { label: "Customers", path: "/customers", icon: Users },
       { label: "LOS Pipeline", path: "/transactions/los", icon: GitBranch },
+      { label: "Active Loans", path: "/transactions", icon: Landmark },
+    ],
+  },
+  {
+    title: "TRANSACTIONS",
+    items: [
+      { label: "New Transaction", path: "/transactions/new", icon: FilePlus },
+      { label: "Collect Charges", path: "/collection/queue", icon: Receipt },
+      { label: "Loan Closures", path: "/transactions/forfeitures", icon: CheckSquare },
+      { label: "Auctions", path: "/transactions/auctions", icon: Gavel },
       { label: "Balance Transfer", path: "/transactions/balance-transfer", icon: Banknote },
     ],
   },
-  { label: "Gold Vault", path: "/vault", icon: Lock },
   {
-    label: "Accounting",
-    icon: BookOpen,
-    children: [
-      { label: "Vouchers", path: "/accounting/vouchers", icon: Receipt },
-      { label: "Day Book", path: "/accounting/daybook", icon: BookText },
-      { label: "Ledger", path: "/accounting/ledger", icon: FileText },
-      { label: "Chart of Accounts", path: "/accounting/chart-of-accounts", icon: BookOpen },
-      { label: "Cash Management", path: "/accounting/cash", icon: DollarSign },
-      { label: "Trial Balance", path: "/accounting/trial-balance", icon: TrendingUp },
-      { label: "P&L", path: "/accounting/pnl", icon: PieChart },
-      { label: "Balance Sheet", path: "/accounting/balance-sheet", icon: DollarSign },
+    title: "VAULT & ACCOUNTING",
+    items: [
+      { label: "Gold Vault", path: "/vault", icon: Lock },
+      {
+        label: "Accounting",
+        icon: BookOpen,
+        children: [
+          { label: "Vouchers", path: "/accounting/vouchers", icon: Receipt },
+          { label: "Day Book", path: "/accounting/daybook", icon: BookText },
+          { label: "Ledger", path: "/accounting/ledger", icon: FileText },
+          { label: "Chart of Accounts", path: "/accounting/chart", icon: BookOpen },
+          { label: "Cash Mgmt", path: "/accounting/cash", icon: DollarSign },
+          { label: "Trial Balance", path: "/accounting/trial-balance", icon: TrendingUp },
+          { label: "P&L", path: "/accounting/pnl", icon: PieChart },
+          { label: "Balance Sheet", path: "/accounting/balance-sheet", icon: DollarSign },
+        ],
+      },
     ],
   },
-  { label: "Reports", path: "/reports", icon: BarChart3 },
-  { label: "Approvals", path: "/approvals", icon: CheckSquare },
   {
-    label: "Collection",
-    icon: PhoneCall,
-    children: [
+    title: "COLLECTION",
+    items: [
       { label: "Collection Queue", path: "/collection", icon: PhoneCall },
       { label: "DPD Tracker", path: "/collection/dpd", icon: BarChart3 },
       { label: "NPA Dashboard", path: "/collection/npa", icon: TrendingUp },
@@ -91,22 +109,38 @@ const menuItems: NavItem[] = [
     ],
   },
   {
-    label: "Communications",
-    icon: MessageSquare,
-    children: [
+    title: "REPORTS",
+    items: [
+      { label: "Reports & Analytics", path: "/reports", icon: BarChart3 },
+      { label: "Notifications", path: "/notifications", icon: Bell },
+      { label: "Approvals", path: "/approvals", icon: CheckSquare },
+    ],
+  },
+  {
+    title: "COMMUNICATIONS",
+    items: [
       { label: "WhatsApp Inbox", path: "/communications/whatsapp", icon: MessageSquare },
       { label: "Templates", path: "/communications/templates", icon: FileText },
     ],
   },
-  { label: "Help Center", path: "/help", icon: BookOpen },
-  { label: "Settings", path: "/settings", icon: Settings },
   {
-    label: "Super Admin",
-    icon: Settings,
-    children: [
+    title: "SETTINGS",
+    items: [
+      { label: "Settings", path: "/settings", icon: Settings },
+      { label: "Users", path: "/settings/users", icon: UserCog },
+      { label: "Branches", path: "/settings/branches", icon: Building2 },
+      { label: "Schemes", path: "/settings/schemes", icon: Layers },
+      { label: "Masters", path: "/settings/masters", icon: List },
+      { label: "Profile", path: "/settings/profile", icon: User },
+    ],
+  },
+  {
+    title: "ADMIN",
+    items: [
       { label: "Admin Panel", path: "/admin", icon: Settings },
       { label: "Test Checklist", path: "/admin/test-checklist", icon: CheckSquare },
-      { label: "Cron Status", path: "/admin/cron-status", icon: BarChart3 },
+      { label: "Cron Status", path: "/settings/cron-status", icon: BarChart3 },
+      { label: "Help Center", path: "/help", icon: BookOpen },
     ],
   },
 ];
@@ -133,21 +167,22 @@ const AppSidebar = () => {
     return item.requireProducts.every((p) => enabledProducts.includes(p));
   };
 
-  // Filter menu items by role access AND enabled products
-  const filteredItems = menuItems
-    .map((item) => {
-      if (!isProductVisible(item)) return null;
-      if (item.children) {
-        const visibleChildren = item.children.filter(
-          (c) => canAccessPath(c.path, roles) && isProductVisible(c)
-        );
-        if (visibleChildren.length === 0) return null;
-        return { ...item, children: visibleChildren };
-      }
-      if (item.path && !canAccessPath(item.path, roles)) return null;
-      return item;
-    })
-    .filter(Boolean) as NavItem[];
+  const filterItems = (items: NavItem[]): NavItem[] => {
+    return items
+      .map((item) => {
+        if (!isProductVisible(item)) return null;
+        if (item.children) {
+          const visibleChildren = item.children.filter(
+            (c) => canAccessPath(c.path, roles) && isProductVisible(c)
+          );
+          if (visibleChildren.length === 0) return null;
+          return { ...item, children: visibleChildren };
+        }
+        if (item.path && !canAccessPath(item.path, roles)) return null;
+        return item;
+      })
+      .filter(Boolean) as NavItem[];
+  };
 
   const initials = (profile?.full_name || "U")
     .split(" ")
@@ -269,9 +304,25 @@ const AppSidebar = () => {
 
       <Separator className="bg-sidebar-border mx-3" />
 
-      {/* Nav */}
-      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto scrollbar-thin">
-        {filteredItems.map(renderNavItem)}
+      {/* Nav with section labels */}
+      <nav className="flex-1 py-3 px-2 space-y-1 overflow-y-auto scrollbar-thin">
+        {navGroups.map((group) => {
+          const visibleItems = filterItems(group.items);
+          if (visibleItems.length === 0) return null;
+          return (
+            <div key={group.title} className="mb-1">
+              {!collapsed && (
+                <p className="px-3 pt-3 pb-1 text-[10px] font-semibold tracking-widest text-sidebar-foreground/40 uppercase">
+                  {group.title}
+                </p>
+              )}
+              {collapsed && <Separator className="bg-sidebar-border mx-1 my-1" />}
+              <div className="space-y-0.5">
+                {visibleItems.map(renderNavItem)}
+              </div>
+            </div>
+          );
+        })}
       </nav>
 
       {/* User footer */}
