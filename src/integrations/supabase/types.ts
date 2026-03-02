@@ -1701,6 +1701,39 @@ export type Database = {
           },
         ]
       }
+      metal_types: {
+        Row: {
+          code: string
+          default_ltv_cap: number | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          rate_unit: string | null
+          symbol: string | null
+        }
+        Insert: {
+          code: string
+          default_ltv_cap?: number | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          rate_unit?: string | null
+          symbol?: string | null
+        }
+        Update: {
+          code?: string
+          default_ltv_cap?: number | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          rate_unit?: string | null
+          symbol?: string | null
+        }
+        Relationships: []
+      }
       notification_log: {
         Row: {
           channel: string
@@ -2619,6 +2652,97 @@ export type Database = {
           },
           {
             foreignKeyName: "voucher_lines_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      voucher_series: {
+        Row: {
+          created_at: string | null
+          current_number: number | null
+          financial_year: string | null
+          id: string
+          prefix: string
+          product_type: string | null
+          tenant_id: string
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_number?: number | null
+          financial_year?: string | null
+          id?: string
+          prefix: string
+          product_type?: string | null
+          tenant_id: string
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          current_number?: number | null
+          financial_year?: string | null
+          id?: string
+          prefix?: string
+          product_type?: string | null
+          tenant_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voucher_series_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vouchers: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          date: string | null
+          id: string
+          narration: string | null
+          product_type: string | null
+          reference_id: string | null
+          reference_type: string | null
+          tenant_id: string
+          type: string | null
+          voucher_no: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          date?: string | null
+          id?: string
+          narration?: string | null
+          product_type?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          tenant_id: string
+          type?: string | null
+          voucher_no?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          date?: string | null
+          id?: string
+          narration?: string | null
+          product_type?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          tenant_id?: string
+          type?: string | null
+          voucher_no?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vouchers_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
