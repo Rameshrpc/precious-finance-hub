@@ -61,7 +61,7 @@ export default function TransactionsNewPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const applicationId = searchParams.get("applicationId");
-  const { tenantId } = useTenant();
+  const { tenantId, enabledProducts: tenantProducts, enableSilver } = useTenant();
   const { user, profile } = useAuth();
 
   // Core state
@@ -83,8 +83,7 @@ export default function TransactionsNewPage() {
   const [saving, setSaving] = useState(false);
 
   const labels = useLabels(productType || "GL");
-  const enabledProducts = ["GL", "PO", "SA"];
-  const visibleProducts = PRODUCT_CARDS.filter((p) => enabledProducts.includes(p.type));
+  const visibleProducts = PRODUCT_CARDS.filter((p) => tenantProducts.includes(p.type));
 
   useEffect(() => {
     if (visibleProducts.length === 1 && !productType) setProductType(visibleProducts[0].type);
@@ -171,7 +170,7 @@ export default function TransactionsNewPage() {
   });
 
   const goldItems = useMemo(() => (masterItems || []).filter((i: any) => i.item_groups?.metal_type === "gold"), [masterItems]);
-  const silverItems = useMemo(() => (masterItems || []).filter((i: any) => i.item_groups?.metal_type === "silver"), [masterItems]);
+  const silverItems = useMemo(() => enableSilver ? (masterItems || []).filter((i: any) => i.item_groups?.metal_type === "silver") : [], [masterItems, enableSilver]);
 
   const gold22kRate = todayRates ? Number(todayRates.gold_22k) : 0;
   const gold24kRate = todayRates ? Number(todayRates.gold_24k) : 0;
@@ -465,7 +464,7 @@ export default function TransactionsNewPage() {
           <TrendingUp className="h-4 w-4 text-accent" />
           <span>Today: <strong className="text-accent">Gold 22K {formatINR(gold22kRate)}/g</strong></span>
           <span className="text-muted-foreground">24K {formatINR(gold24kRate)}/g</span>
-          <span className="text-muted-foreground">Silver {formatINR(silverPerGRate, 2)}/g</span>
+          {enableSilver && <span className="text-muted-foreground">Silver {formatINR(silverPerGRate, 2)}/g</span>}
           {!todayRates && <span className="text-destructive text-xs">(No rates set today)</span>}
         </div>
       )}
@@ -553,7 +552,7 @@ export default function TransactionsNewPage() {
               {totals.goldCount} items · {formatWeight(totals.goldWeight)} · <strong>{formatINR(totals.goldValue)}</strong>
             </span>
           )}
-          {totals.silverCount > 0 && (
+          {enableSilver && totals.silverCount > 0 && (
             <span className="flex items-center gap-1.5">
               <Badge variant="secondary">Silver</Badge>
               {totals.silverCount} items · {formatWeight(totals.silverWeight)} · <strong>{formatINR(totals.silverValue)}</strong>
