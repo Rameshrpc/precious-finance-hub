@@ -58,6 +58,8 @@ import NotificationsPage from "./pages/NotificationsPage";
 import UserManagementPage from "./pages/UserManagementPage";
 import ProfileSettingsPage from "./pages/ProfileSettingsPage";
 import WhatsNewDialog from "./components/WhatsNewDialog";
+import BranchSettingsPage from "./pages/BranchSettingsPage";
+import SchemeSettingsPage from "./pages/SchemeSettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -125,6 +127,8 @@ const App = () => (
             <Route path="/settings/security" element={<SecuritySettingsPage />} />
             <Route path="/settings/api-keys" element={<ApiKeysPage />} />
             <Route path="/settings/users" element={<UserManagementPage />} />
+            <Route path="/settings/branches" element={<BranchSettingsPage />} />
+            <Route path="/settings/schemes" element={<SchemeSettingsPage />} />
             <Route path="/settings/profile" element={<ProfileSettingsPage />} />
             <Route path="/admin" element={<SuperAdminPage />} />
             <Route path="/admin/test-checklist" element={<TestChecklistPage />} />
