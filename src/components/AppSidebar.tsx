@@ -26,6 +26,9 @@ import {
   ChevronRight,
   ChevronDown,
   ChevronRight as ChevronSubRight,
+  Banknote,
+  ShoppingCart,
+  Handshake,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -41,7 +44,9 @@ interface NavItem {
   label: string;
   path?: string;
   icon: React.ElementType;
-  children?: { label: string; path: string; icon: React.ElementType }[];
+  /** Only show if ALL listed products are enabled. Empty = always show. */
+  requireProducts?: string[];
+  children?: (NavItem & { path: string })[];
 }
 
 const menuItems: NavItem[] = [
@@ -54,6 +59,7 @@ const menuItems: NavItem[] = [
       { label: "New Transaction", path: "/transactions/new", icon: FilePlus },
       { label: "All Transactions", path: "/transactions", icon: List },
       { label: "LOS Pipeline", path: "/transactions/los", icon: GitBranch },
+      { label: "Balance Transfer", path: "/transactions/balance-transfer", icon: Banknote },
     ],
   },
   { label: "Gold Vault", path: "/vault", icon: Lock },
@@ -64,6 +70,8 @@ const menuItems: NavItem[] = [
       { label: "Vouchers", path: "/accounting/vouchers", icon: Receipt },
       { label: "Day Book", path: "/accounting/daybook", icon: BookText },
       { label: "Ledger", path: "/accounting/ledger", icon: FileText },
+      { label: "Chart of Accounts", path: "/accounting/chart-of-accounts", icon: BookOpen },
+      { label: "Cash Management", path: "/accounting/cash", icon: DollarSign },
       { label: "Trial Balance", path: "/accounting/trial-balance", icon: TrendingUp },
       { label: "P&L", path: "/accounting/pnl", icon: PieChart },
       { label: "Balance Sheet", path: "/accounting/balance-sheet", icon: DollarSign },
@@ -71,7 +79,17 @@ const menuItems: NavItem[] = [
   },
   { label: "Reports", path: "/reports", icon: BarChart3 },
   { label: "Approvals", path: "/approvals", icon: CheckSquare },
-  { label: "Collection", path: "/collection", icon: PhoneCall },
+  {
+    label: "Collection",
+    icon: PhoneCall,
+    children: [
+      { label: "Collection Queue", path: "/collection", icon: PhoneCall },
+      { label: "DPD Tracker", path: "/collection/dpd", icon: BarChart3 },
+      { label: "NPA Dashboard", path: "/collection/npa", icon: TrendingUp },
+      { label: "Telecaller", path: "/collection/telecaller", icon: PhoneCall },
+      { label: "Grievance", path: "/collection/grievance", icon: FileText },
+    ],
+  },
   {
     label: "Communications",
     icon: MessageSquare,
@@ -88,6 +106,7 @@ const menuItems: NavItem[] = [
     children: [
       { label: "Admin Panel", path: "/admin", icon: Settings },
       { label: "Test Checklist", path: "/admin/test-checklist", icon: CheckSquare },
+      { label: "Cron Status", path: "/admin/cron-status", icon: BarChart3 },
     ],
   },
 ];
@@ -96,7 +115,7 @@ const AppSidebar = () => {
   const { collapsed, setCollapsed } = useSidebarState();
   const location = useLocation();
   const { profile, roles, signOut } = useAuth();
-  const { tenantName } = useTenant();
+  const { tenantName, enabledProducts } = useTenant();
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
 
   const isActive = (path?: string) => path ? location.pathname === path : false;
@@ -109,11 +128,19 @@ const AppSidebar = () => {
 
   const primaryRole = roles[0] || "staff";
 
-  // Filter menu items by role access
+  const isProductVisible = (item: NavItem): boolean => {
+    if (!item.requireProducts || item.requireProducts.length === 0) return true;
+    return item.requireProducts.every((p) => enabledProducts.includes(p));
+  };
+
+  // Filter menu items by role access AND enabled products
   const filteredItems = menuItems
     .map((item) => {
+      if (!isProductVisible(item)) return null;
       if (item.children) {
-        const visibleChildren = item.children.filter((c) => canAccessPath(c.path, roles));
+        const visibleChildren = item.children.filter(
+          (c) => canAccessPath(c.path, roles) && isProductVisible(c)
+        );
         if (visibleChildren.length === 0) return null;
         return { ...item, children: visibleChildren };
       }
@@ -121,6 +148,7 @@ const AppSidebar = () => {
       return item;
     })
     .filter(Boolean) as NavItem[];
+
   const initials = (profile?.full_name || "U")
     .split(" ")
     .map((n) => n[0])
