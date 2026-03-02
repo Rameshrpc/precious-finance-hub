@@ -27,6 +27,7 @@ const DEFAULT_RULES: ApprovalRule[] = [
 ];
 
 const ROLE_HIERARCHY: Record<AppRole, number> = {
+  viewer: 0,
   staff: 1,
   manager: 2,
   tenant_admin: 3,
