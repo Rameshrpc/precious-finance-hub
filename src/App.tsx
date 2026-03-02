@@ -55,6 +55,8 @@ import CronStatusPage from "./pages/CronStatusPage";
 import TestChecklistPage from "./pages/TestChecklistPage";
 import HelpCenterPage from "./pages/HelpCenterPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import UserManagementPage from "./pages/UserManagementPage";
+import ProfileSettingsPage from "./pages/ProfileSettingsPage";
 import WhatsNewDialog from "./components/WhatsNewDialog";
 
 const queryClient = new QueryClient();
@@ -122,6 +124,8 @@ const App = () => (
             <Route path="/settings/cron-status" element={<CronStatusPage />} />
             <Route path="/settings/security" element={<SecuritySettingsPage />} />
             <Route path="/settings/api-keys" element={<ApiKeysPage />} />
+            <Route path="/settings/users" element={<UserManagementPage />} />
+            <Route path="/settings/profile" element={<ProfileSettingsPage />} />
             <Route path="/admin" element={<SuperAdminPage />} />
             <Route path="/admin/test-checklist" element={<TestChecklistPage />} />
             <Route path="/help" element={<HelpCenterPage />} />

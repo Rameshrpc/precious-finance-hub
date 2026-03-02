@@ -29,7 +29,10 @@ const ROUTE_ACCESS: Record<string, AppRole[]> = {
   "/collection/telecaller": ["super_admin", "tenant_admin", "manager", "staff"],
   "/collection": ["super_admin", "tenant_admin", "manager", "staff"],
   "/communications": ["super_admin", "tenant_admin", "manager"],
+  "/settings/users": ["super_admin", "tenant_admin"],
+  "/settings/profile": ["super_admin", "tenant_admin", "manager", "staff", "viewer"],
   "/settings": ["super_admin", "tenant_admin"],
+  "/notifications": ["super_admin", "tenant_admin", "manager", "staff", "viewer"],
   "/admin": ["super_admin"],
   "/help": ["super_admin", "tenant_admin", "manager", "staff", "viewer"],
 };
