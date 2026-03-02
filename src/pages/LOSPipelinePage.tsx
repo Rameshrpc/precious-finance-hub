@@ -28,20 +28,22 @@ export default function LOSPipelinePage() {
     branch: branchFilter,
   });
 
-  // Funnel data
+  // Funnel data — 5 stages per spec
   const funnelData = useMemo(() => {
     if (!stageCounts) return [];
-    let cumulative = 0;
-    // Count applications that reached at least this stage
-    const stageOrder = ["applied", "docs_collected", "valued", "checked", "approved", "disbursed"];
+    const stageOrder = ["applied", "docs_collected", "valued", "approved", "disbursed"];
     const atLeast: Record<string, number> = {};
-    stageOrder.forEach((s) => {
-      atLeast[s] = 0;
-    });
-    // Sum: an app at "approved" has also passed "applied", "docs_collected", etc.
+    stageOrder.forEach((s) => { atLeast[s] = 0; });
+    // An app at "approved" has also passed "applied", "docs_collected", etc.
+    // "checked" counts toward "valued" bucket
+    const mapStage = (s: string) => {
+      if (s === "checked") return "valued";
+      return s;
+    };
     Object.entries(stageCounts).forEach(([stage, count]) => {
       if (stage === "rejected") return;
-      const idx = stageOrder.indexOf(stage);
+      const mapped = mapStage(stage);
+      const idx = stageOrder.indexOf(mapped);
       if (idx >= 0) {
         for (let i = 0; i <= idx; i++) {
           atLeast[stageOrder[i]] += count;
@@ -113,7 +115,7 @@ export default function LOSPipelinePage() {
           { label: "Today's Apps", value: todayApps, icon: FileText, color: "text-blue-500" },
           { label: "Avg Processing", value: "—", icon: Clock, color: "text-orange-500" },
           { label: "Approval Rate", value: `${approvalRate}%`, icon: CheckCircle2, color: "text-green-500" },
-          { label: "Total Pipeline", value: totalApps, icon: UserCheck, color: "text-purple-500" },
+          { label: "Pending with Me", value: (applications || []).filter((a: any) => ["applied", "docs_collected", "valued", "checked"].includes(a.stage)).length, icon: UserCheck, color: "text-purple-500" },
         ].map((m) => (
           <Card key={m.label}>
             <CardContent className="pt-4 pb-4">
