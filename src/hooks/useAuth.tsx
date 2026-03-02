@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -10,13 +10,24 @@ interface UserProfile {
   branch_id: string | null;
 }
 
-export function useAuth() {
+interface AuthContextValue {
+  user: User | null;
+  profile: UserProfile | null;
+  roles: string[];
+  loading: boolean;
+  signOut: () => Promise<void>;
+  hasRole: (role: string) => boolean;
+}
+
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [roles, setRoles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Listen for auth changes — no async work here to avoid deadlock
+  // Single auth subscription
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
@@ -42,18 +53,16 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch profile + roles whenever user changes (outside auth callback)
+  // Fetch profile + roles outside auth callback
   useEffect(() => {
     if (!user) return;
-
     let cancelled = false;
 
-    const fetchProfileAndRoles = async () => {
+    const fetchData = async () => {
       const [profileRes, rolesRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).single(),
         supabase.from("user_roles").select("role").eq("user_id", user.id),
       ]);
-
       if (!cancelled) {
         setProfile(profileRes.data as UserProfile | null);
         setRoles((rolesRes.data || []).map((r) => r.role));
@@ -61,8 +70,7 @@ export function useAuth() {
       }
     };
 
-    fetchProfileAndRoles();
-
+    fetchData();
     return () => { cancelled = true; };
   }, [user]);
 
@@ -72,5 +80,17 @@ export function useAuth() {
 
   const hasRole = (role: string) => roles.includes(role);
 
-  return { user, profile, roles, loading, signOut, hasRole };
+  return (
+    <AuthContext.Provider value={{ user, profile, roles, loading, signOut, hasRole }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (ctx === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return ctx;
 }
