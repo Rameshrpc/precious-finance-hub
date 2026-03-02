@@ -18,9 +18,10 @@ import ReloanDialog from "@/components/ReloanDialog";
 import MarginRenewalDialog from "@/components/MarginRenewalDialog";
 import PartialReleaseDialog from "@/components/PartialReleaseDialog";
 import LoanRestructureDialog from "@/components/LoanRestructureDialog";
+import ReceiptModal from "@/components/ReceiptModal";
 import {
   ArrowLeft, IndianRupee, TrendingUp, Clock, FileText, Printer,
-  RefreshCw, Download, CircleDot, CalendarDays, Wrench, Phone
+  RefreshCw, Download, CircleDot, CalendarDays, Wrench, Phone, History
 } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -56,6 +57,8 @@ export default function TransactionDetailPage() {
   const [marginRenewalOpen, setMarginRenewalOpen] = useState(false);
   const [partialReleaseOpen, setPartialReleaseOpen] = useState(false);
   const [restructureOpen, setRestructureOpen] = useState(false);
+  const [historyReceiptData, setHistoryReceiptData] = useState<any>(null);
+  const [historyReceiptOpen, setHistoryReceiptOpen] = useState(false);
 
   const labels = useLabels(loan?.product_type || "GL");
 
@@ -178,6 +181,7 @@ export default function TransactionDetailPage() {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="items">Items ({pledgeItems.length})</TabsTrigger>
           <TabsTrigger value="charges">{labels.charge}s ({interestRecords.length})</TabsTrigger>
+          <TabsTrigger value="history">Collection History</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="audit">Audit Trail</TabsTrigger>
         </TabsList>
@@ -365,6 +369,125 @@ export default function TransactionDetailPage() {
           )}
         </TabsContent>
 
+        {/* COLLECTION HISTORY */}
+        <TabsContent value="history" className="mt-4 space-y-4">
+          {(() => {
+            const paidRecords = interestRecords
+              .filter((r: any) => r.status === "paid" || r.status === "partial")
+              .sort((a: any, b: any) => new Date(b.payment_date || b.updated_at).getTime() - new Date(a.payment_date || a.updated_at).getTime());
+
+            const openHistoryReceipt = (rec: any) => {
+              setHistoryReceiptData({
+                receiptNumber: rec.receipt_number || "—",
+                loanNumber: loan.loan_number,
+                customerName: loan.customer?.name || "—",
+                productType: loan.product_type,
+                schemeName: scheme?.name,
+                collectedBy: "—",
+                paymentMode: rec.payment_mode || "cash",
+                totalAmount: Number(rec.paid),
+                collectedAt: rec.payment_date || rec.updated_at,
+                lineItems: [{
+                  periodStart: rec.period_start,
+                  periodEnd: rec.period_end,
+                  chargeType: labels.charge,
+                  dueAmount: Number(rec.amount) + Number(rec.penalty),
+                  paidAmount: Number(rec.paid),
+                  mode: rec.payment_mode || "cash",
+                }],
+              });
+              setHistoryReceiptOpen(true);
+            };
+
+            const exportCSV = () => {
+              const headers = ["Receipt No", "Date & Time", "Charge Type", "Period", "Amount Collected", "Payment Mode", "Status"];
+              const rows = paidRecords.map((r: any) => [
+                r.receipt_number || "",
+                r.payment_date ? new Date(r.payment_date).toLocaleString("en-IN") : "",
+                labels.charge,
+                `${formatDate(r.period_start)} – ${formatDate(r.period_end)}`,
+                Number(r.paid).toFixed(2),
+                r.payment_mode || "",
+                r.status,
+              ]);
+              const csv = [headers, ...rows].map(row => row.map(c => `"${c}"`).join(",")).join("\n");
+              const blob = new Blob([csv], { type: "text/csv" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `collection-history-${loan.loan_number}.csv`;
+              a.click();
+              URL.revokeObjectURL(url);
+            };
+
+            if (paidRecords.length === 0) {
+              return (
+                <Card>
+                  <CardContent className="py-8 text-center text-muted-foreground">
+                    <History className="mx-auto h-8 w-8 mb-2 opacity-40" />
+                    <p>No collections recorded yet</p>
+                  </CardContent>
+                </Card>
+              );
+            }
+
+            return (
+              <>
+                <div className="flex justify-end">
+                  <Button size="sm" variant="outline" className="gap-1.5" onClick={exportCSV}>
+                    <Download className="h-3.5 w-3.5" />Export CSV
+                  </Button>
+                </div>
+                <div className="border rounded-lg overflow-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-accent/10">
+                        <TableHead>Receipt No</TableHead>
+                        <TableHead>Date & Time</TableHead>
+                        <TableHead>Charge Type</TableHead>
+                        <TableHead>Period</TableHead>
+                        <TableHead className="text-right">Amount Collected</TableHead>
+                        <TableHead>Payment Mode</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {paidRecords.map((rec: any) => (
+                        <TableRow key={rec.id}>
+                          <TableCell>
+                            {rec.receipt_number ? (
+                              <button
+                                className="font-mono text-sm text-accent hover:underline cursor-pointer"
+                                onClick={() => openHistoryReceipt(rec)}
+                              >
+                                {rec.receipt_number}
+                              </button>
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {rec.payment_date ? new Date(rec.payment_date).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "—"}
+                          </TableCell>
+                          <TableCell className="text-sm">{labels.charge}</TableCell>
+                          <TableCell className="text-sm">{formatDate(rec.period_start)} – {formatDate(rec.period_end)}</TableCell>
+                          <TableCell className="text-right font-medium">{formatINR(rec.paid)}</TableCell>
+                          <TableCell className="text-sm capitalize">{rec.payment_mode || "—"}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="bg-[hsl(142,70%,45%,0.15)] text-[hsl(142,70%,35%)] border-[hsl(142,70%,45%,0.3)]">
+                              {rec.status === "partial" ? "Partial" : "Paid"}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
+            );
+          })()}
+        </TabsContent>
+
         {/* DOCUMENTS */}
         <TabsContent value="documents" className="mt-4">
           <Card>
@@ -410,6 +533,7 @@ export default function TransactionDetailPage() {
       {loan.product_type === "SA" && <MarginRenewalDialog open={marginRenewalOpen} onOpenChange={setMarginRenewalOpen} loan={loan} />}
       <PartialReleaseDialog open={partialReleaseOpen} onOpenChange={setPartialReleaseOpen} loan={loan} pledgeItems={pledgeItems} />
       <LoanRestructureDialog open={restructureOpen} onOpenChange={setRestructureOpen} loan={loan} />
+      <ReceiptModal open={historyReceiptOpen} onOpenChange={setHistoryReceiptOpen} data={historyReceiptData} />
     </div>
   );
 }
