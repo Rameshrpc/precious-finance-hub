@@ -310,6 +310,10 @@ export default function TransactionsNewPage() {
         gold_value: totals.goldValue,
         silver_value: totals.silverValue,
         total_pledge_value: totals.total,
+        total_gold_value: totals.goldValue,
+        total_silver_value: totals.silverValue,
+        metal_composition: totals.silverValue > 0 ? "mixed" : "gold",
+        ltv_ratio: ltvCalc?.overallLtv || 0,
         gold_ltv: ltvCalc?.goldLtv || 0,
         silver_ltv: ltvCalc?.silverLtv || 0,
         overall_ltv: ltvCalc?.overallLtv || 0,
@@ -583,7 +587,7 @@ export default function TransactionsNewPage() {
               <SelectContent>
                 {filteredSchemes.map((s: any) => (
                   <SelectItem key={s.id} value={s.id}>
-                    {s.name} · {Number(s.rate).toFixed(1)}% · {s.tenure_months}mo · LTV {Number(s.gold_ltv_cap)}/{Number(s.silver_ltv_cap)}
+                    {s.name} — {Number(s.rate).toFixed(1)}% / {s.tenure_months} months, LTV {Number(s.gold_ltv_cap)}%/{Number(s.silver_ltv_cap)}%
                   </SelectItem>
                 ))}
                 {filteredSchemes.length === 0 && <SelectItem value="_none" disabled>No matching schemes</SelectItem>}
@@ -606,15 +610,20 @@ export default function TransactionsNewPage() {
         <Card className={ltvCalc.exceeds ? "border-destructive" : ""}>
           <CardHeader><CardTitle className="text-lg">LTV Calculator</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Max Eligible: <strong className="text-foreground">{formatINR(ltvCalc.maxEligible)}</strong></span>
-              {ltvCalc.exceeds && <Badge variant="destructive">Exceeds LTV Cap!</Badge>}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Max Eligible: <strong className="text-foreground">{formatINR(ltvCalc.maxEligible)}</strong></span>
+                {ltvCalc.exceeds && <Badge variant="destructive">Exceeds LTV Cap!</Badge>}
+              </div>
+              {ltvCalc.exceeds && (
+                <p className="text-xs text-destructive font-medium">Exceeds max LTV. Reduce by {formatINR(parseFloat(amount) - ltvCalc.maxEligible)}</p>
+              )}
             </div>
             {/* Overall LTV */}
             <div>
               <div className="flex justify-between text-xs mb-1">
                 <span>Overall LTV</span>
-                <span className="font-bold">{ltvCalc.overallLtv.toFixed(1)}%</span>
+                <span className="font-bold">LTV: {ltvCalc.overallLtv.toFixed(1)}% of {Math.max(ltvCalc.goldCap, ltvCalc.silverCap)}% cap</span>
               </div>
               <Progress value={Math.min(ltvCalc.overallLtv, 100)} className={cn("h-2.5", ltvCalc.overallLtv > 80 ? "[&>div]:bg-destructive" : ltvCalc.overallLtv > 60 ? "[&>div]:bg-[hsl(var(--warning))]" : "[&>div]:bg-[hsl(var(--success))]")} />
             </div>
