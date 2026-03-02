@@ -155,12 +155,19 @@ export default function ChargeCollectionDialog({
 
         {/* Loan summary */}
         <Card className="bg-muted/50">
-          <CardContent className="p-3 flex justify-between text-sm">
-            <div>
-              <span className="font-mono font-medium">{loan.loan_number}</span>
-              <span className="text-muted-foreground ml-2">{loan.customer?.name}</span>
+          <CardContent className="p-3 space-y-1 text-sm">
+            <div className="flex justify-between">
+              <div>
+                <span className="font-mono font-medium">{loan.loan_number}</span>
+                <span className="text-muted-foreground ml-2">{loan.customer?.name}</span>
+              </div>
+              <Badge variant="outline">{loan.product_type}</Badge>
             </div>
-            <div className="font-medium">Principal: {formatINR(loan.amount)}</div>
+            <div className="flex gap-4 text-muted-foreground">
+              <span>Principal: <span className="text-foreground font-medium">{formatINR(loan.amount)}</span></span>
+              {loan.scheme?.name && <span>Scheme: <span className="text-foreground">{loan.scheme.name}</span></span>}
+              <span>Rate: <span className="text-foreground">{loan.rate}% p.m.</span></span>
+            </div>
           </CardContent>
         </Card>
 
@@ -279,7 +286,7 @@ export default function ChargeCollectionDialog({
 
               {/* Collect Button */}
               <Button
-                className="w-full gap-2"
+                className="w-full gap-2 bg-accent text-accent-foreground hover:bg-accent/90"
                 disabled={selected.size === 0 || finalAmount <= 0 || collectMutation.isPending}
                 onClick={() => collectMutation.mutate()}
               >
