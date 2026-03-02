@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLoans, LoanWithCustomer } from "@/hooks/useLoans";
+import { useTenant } from "@/contexts/TenantContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,25 +10,27 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import CustomerQuickCard from "@/components/CustomerQuickCard";
-import { formatINR, formatWeight, formatDate } from "@/lib/formatters";
+import { formatINR, formatDate } from "@/lib/formatters";
 import { getLabel } from "@/lib/labels";
 import { Plus, Search, LayoutList, LayoutGrid, Calendar } from "lucide-react";
 
 const STATUS_COLORS: Record<string, string> = {
-  active: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  overdue: "bg-red-100 text-red-800 border-red-200",
-  matured: "bg-orange-100 text-orange-800 border-orange-200",
-  closed: "bg-gray-100 text-gray-600 border-gray-200",
+  active: "bg-[hsl(142,70%,45%,0.15)] text-[hsl(142,70%,35%)] border-[hsl(142,70%,45%,0.3)]",
+  overdue: "bg-destructive/15 text-destructive border-destructive/30",
+  matured: "bg-[hsl(30,90%,50%,0.15)] text-[hsl(30,90%,40%)] border-[hsl(30,90%,50%,0.3)]",
+  closed: "bg-muted text-muted-foreground border-border",
+  pending: "bg-primary/15 text-primary border-primary/30",
 };
 
 const PRODUCT_COLORS: Record<string, string> = {
-  GL: "bg-amber-100 text-amber-800 border-amber-200",
-  PO: "bg-blue-100 text-blue-800 border-blue-200",
-  SA: "bg-purple-100 text-purple-800 border-purple-200",
+  GL: "bg-accent/15 text-accent border-accent/30",
+  PO: "bg-primary/15 text-primary border-primary/30",
+  SA: "bg-[hsl(270,60%,55%,0.15)] text-[hsl(270,60%,45%)] border-[hsl(270,60%,55%,0.3)]",
 };
 
 export default function TransactionsListPage() {
   const navigate = useNavigate();
+  const { enabledProducts, enableSilver } = useTenant();
   const { data: loans = [], isLoading } = useLoans();
 
   const [productTab, setProductTab] = useState("ALL");
@@ -38,15 +41,15 @@ export default function TransactionsListPage() {
 
   // Counts
   const productCounts = useMemo(() => {
-    const c = { ALL: loans.length, GL: 0, PO: 0, SA: 0 };
-    loans.forEach((l) => { if (l.product_type in c) c[l.product_type as keyof typeof c]++; });
+    const c: Record<string, number> = { ALL: loans.length, GL: 0, PO: 0, SA: 0 };
+    loans.forEach((l) => { if (l.product_type in c) c[l.product_type]++; });
     return c;
   }, [loans]);
 
   const statusCounts = useMemo(() => {
     const base = productTab === "ALL" ? loans : loans.filter((l) => l.product_type === productTab);
-    const c = { all: base.length, active: 0, overdue: 0, matured: 0, closed: 0 };
-    base.forEach((l) => { if (l.status in c) c[l.status as keyof typeof c]++; });
+    const c: Record<string, number> = { all: base.length, active: 0, overdue: 0, matured: 0, closed: 0 };
+    base.forEach((l) => { if (l.status in c) c[l.status]++; });
     return c;
   }, [loans, productTab]);
 
@@ -54,9 +57,9 @@ export default function TransactionsListPage() {
     let result = loans;
     if (productTab !== "ALL") result = result.filter((l) => l.product_type === productTab);
     if (statusTab !== "all") result = result.filter((l) => l.status === statusTab);
-    if (metalFilter === "gold") result = result.filter((l) => l.gold_value > 0 && l.silver_value === 0);
-    if (metalFilter === "silver") result = result.filter((l) => l.silver_value > 0 && l.gold_value === 0);
-    if (metalFilter === "mixed") result = result.filter((l) => l.gold_value > 0 && l.silver_value > 0);
+    if (metalFilter === "gold") result = result.filter((l) => (l as any).metal_composition === "gold" || (l.gold_value > 0 && l.silver_value === 0));
+    if (metalFilter === "silver") result = result.filter((l) => (l as any).metal_composition === "silver" || (l.silver_value > 0 && l.gold_value === 0));
+    if (metalFilter === "mixed") result = result.filter((l) => (l as any).metal_composition === "mixed" || (l.gold_value > 0 && l.silver_value > 0));
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter((l) =>
@@ -68,9 +71,17 @@ export default function TransactionsListPage() {
     return result;
   }, [loans, productTab, statusTab, metalFilter, search]);
 
-  // Calculate total gold/silver weight from pledge_items not available here, use value proxies
-  const goldWeight = (loan: LoanWithCustomer) => loan.gold_value > 0 ? (loan.gold_value / 6000).toFixed(1) : "-";
-  const silverWeight = (loan: LoanWithCustomer) => loan.silver_value > 0 ? (loan.silver_value / 80).toFixed(1) : "-";
+  const goldWeightDisplay = (loan: LoanWithCustomer) => loan.gold_value > 0 ? `${(loan.gold_value / 6000).toFixed(1)}g` : "—";
+  const silverWeightDisplay = (loan: LoanWithCustomer) => loan.silver_value > 0 ? `${(loan.silver_value / 80).toFixed(1)}g` : "—";
+
+  const metalBadge = (loan: LoanWithCustomer) => {
+    const comp = (loan as any).metal_composition;
+    if (comp === "mixed" || (loan.gold_value > 0 && loan.silver_value > 0)) return <Badge variant="outline" className="text-[10px]">Mixed</Badge>;
+    if (comp === "silver" || (loan.silver_value > 0 && loan.gold_value === 0)) return <Badge variant="outline" className="text-[10px]">Silver</Badge>;
+    return <Badge variant="outline" className="text-[10px] border-accent/30 text-accent">Gold</Badge>;
+  };
+
+  const visibleProductTabs = ["ALL", ...["GL", "PO", "SA"].filter(p => enabledProducts.includes(p))];
 
   return (
     <div className="space-y-4">
@@ -85,18 +96,18 @@ export default function TransactionsListPage() {
       {/* Product Tabs */}
       <Tabs value={productTab} onValueChange={setProductTab}>
         <TabsList>
-          {(["ALL", "GL", "PO", "SA"] as const).map((p) => (
+          {visibleProductTabs.map((p) => (
             <TabsTrigger key={p} value={p} className="gap-1.5">
               {p === "ALL" ? "All" : getLabel(p, "product")}
               <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">
-                {productCounts[p]}
+                {productCounts[p] || 0}
               </Badge>
             </TabsTrigger>
           ))}
         </TabsList>
       </Tabs>
 
-      {/* Status sub-tabs + filters */}
+      {/* Status sub-tabs + metal filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex gap-1">
           {(["all", "active", "overdue", "matured", "closed"] as const).map((s) => (
@@ -109,22 +120,22 @@ export default function TransactionsListPage() {
             >
               {s === "all" ? "All" : s}
               <Badge variant="secondary" className="text-[10px] px-1 py-0 ml-0.5">
-                {statusCounts[s]}
+                {statusCounts[s] || 0}
               </Badge>
             </Button>
           ))}
         </div>
 
         <div className="flex gap-1 ml-auto">
-          {(["all", "gold", "silver", "mixed"] as const).map((m) => (
+          {(["all", "gold", ...(enableSilver ? ["silver", "mixed"] : [])] as const).map((m) => (
             <Button
               key={m}
               size="sm"
               variant={metalFilter === m ? "secondary" : "ghost"}
-              onClick={() => setMetalFilter(m)}
+              onClick={() => setMetalFilter(m as string)}
               className="text-xs capitalize"
             >
-              {m === "all" ? "All Metals" : m}
+              {m === "all" ? "All Metals" : m === "gold" ? "Gold Only" : m === "silver" ? "Silver Only" : "Mixed"}
             </Button>
           ))}
         </div>
@@ -168,8 +179,9 @@ export default function TransactionsListPage() {
                 <TableHead>Product</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
                 <TableHead className="text-right">Gold</TableHead>
-                <TableHead className="text-right">Silver</TableHead>
-                <TableHead className="text-right">LTV</TableHead>
+                {enableSilver && <TableHead className="text-right">Silver</TableHead>}
+                <TableHead className="text-right">LTV%</TableHead>
+                <TableHead>Metal</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Date</TableHead>
               </TableRow>
@@ -187,7 +199,7 @@ export default function TransactionsListPage() {
                       <CustomerQuickCard customerId={loan.customer_id}>
                         <span className="font-medium text-sm hover:underline cursor-pointer">{loan.customer.name}</span>
                       </CustomerQuickCard>
-                    ) : "-"}
+                    ) : "—"}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={PRODUCT_COLORS[loan.product_type] || ""}>
@@ -195,9 +207,10 @@ export default function TransactionsListPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right font-medium">{formatINR(loan.amount)}</TableCell>
-                  <TableCell className="text-right text-sm">{goldWeight(loan)}g</TableCell>
-                  <TableCell className="text-right text-sm">{silverWeight(loan)}g</TableCell>
-                  <TableCell className="text-right text-sm">{loan.overall_ltv}%</TableCell>
+                  <TableCell className="text-right text-sm">{goldWeightDisplay(loan)}</TableCell>
+                  {enableSilver && <TableCell className="text-right text-sm">{silverWeightDisplay(loan)}</TableCell>}
+                  <TableCell className="text-right text-sm">{loan.overall_ltv ? `${Number(loan.overall_ltv).toFixed(1)}%` : "—"}</TableCell>
+                  <TableCell>{metalBadge(loan)}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className={STATUS_COLORS[loan.status] || ""}>
                       {loan.status}
@@ -224,17 +237,21 @@ export default function TransactionsListPage() {
                   <Badge variant="outline" className={STATUS_COLORS[loan.status] || ""}>{loan.status}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-sm">{loan.customer?.name || "-"}</span>
+                  <span className="font-medium text-sm truncate mr-2">{loan.customer?.name || "—"}</span>
                   <Badge variant="outline" className={PRODUCT_COLORS[loan.product_type] || ""}>{loan.product_type}</Badge>
                 </div>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span className="font-semibold text-foreground">{formatINR(loan.amount)}</span>
                   <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{formatDate(loan.created_at)}</span>
                 </div>
-                <div className="flex gap-3 text-xs text-muted-foreground">
-                  <span>LTV {loan.overall_ltv}%</span>
-                  {loan.gold_value > 0 && <span>Gold {goldWeight(loan)}g</span>}
-                  {loan.silver_value > 0 && <span>Silver {silverWeight(loan)}g</span>}
+                <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                  {loan.gold_value > 0 && (
+                    <Badge variant="outline" className="text-[10px] border-accent/30 text-accent">Gold {goldWeightDisplay(loan)}</Badge>
+                  )}
+                  {enableSilver && loan.silver_value > 0 && (
+                    <Badge variant="outline" className="text-[10px]">Silver {silverWeightDisplay(loan)}</Badge>
+                  )}
+                  <span>LTV {loan.overall_ltv ? `${Number(loan.overall_ltv).toFixed(1)}%` : "—"}</span>
                 </div>
               </CardContent>
             </Card>
