@@ -1452,7 +1452,9 @@ export type Database = {
         Row: {
           agent_id: string | null
           amount: number
+          approval_status: string | null
           branch_id: string | null
+          buyback_expiry_date: string | null
           created_at: string
           created_by: string | null
           customer_id: string
@@ -1467,7 +1469,9 @@ export type Database = {
           id: string
           loan_application_id: string | null
           loan_number: string
+          ltv_ratio: number | null
           maturity_date: string | null
+          metal_composition: string | null
           notes: string | null
           overall_ltv: number
           product_type: string
@@ -1479,13 +1483,17 @@ export type Database = {
           status: string
           tenant_id: string
           tenure_months: number
+          total_gold_value: number | null
           total_pledge_value: number
+          total_silver_value: number | null
           updated_at: string
         }
         Insert: {
           agent_id?: string | null
           amount?: number
+          approval_status?: string | null
           branch_id?: string | null
+          buyback_expiry_date?: string | null
           created_at?: string
           created_by?: string | null
           customer_id: string
@@ -1500,7 +1508,9 @@ export type Database = {
           id?: string
           loan_application_id?: string | null
           loan_number: string
+          ltv_ratio?: number | null
           maturity_date?: string | null
+          metal_composition?: string | null
           notes?: string | null
           overall_ltv?: number
           product_type: string
@@ -1512,13 +1522,17 @@ export type Database = {
           status?: string
           tenant_id: string
           tenure_months?: number
+          total_gold_value?: number | null
           total_pledge_value?: number
+          total_silver_value?: number | null
           updated_at?: string
         }
         Update: {
           agent_id?: string | null
           amount?: number
+          approval_status?: string | null
           branch_id?: string | null
+          buyback_expiry_date?: string | null
           created_at?: string
           created_by?: string | null
           customer_id?: string
@@ -1533,7 +1547,9 @@ export type Database = {
           id?: string
           loan_application_id?: string | null
           loan_number?: string
+          ltv_ratio?: number | null
           maturity_date?: string | null
+          metal_composition?: string | null
           notes?: string | null
           overall_ltv?: number
           product_type?: string
@@ -1545,7 +1561,9 @@ export type Database = {
           status?: string
           tenant_id?: string
           tenure_months?: number
+          total_gold_value?: number | null
           total_pledge_value?: number
+          total_silver_value?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -1917,6 +1935,7 @@ export type Database = {
           purity_id: string | null
           purity_name: string | null
           purity_percentage: number
+          rate_at_creation: number | null
           rate_per_gram: number
           released_at: string | null
           tenant_id: string
@@ -1939,6 +1958,7 @@ export type Database = {
           purity_id?: string | null
           purity_name?: string | null
           purity_percentage?: number
+          rate_at_creation?: number | null
           rate_per_gram?: number
           released_at?: string | null
           tenant_id: string
@@ -1961,6 +1981,7 @@ export type Database = {
           purity_id?: string | null
           purity_name?: string | null
           purity_percentage?: number
+          rate_at_creation?: number | null
           rate_per_gram?: number
           released_at?: string | null
           tenant_id?: string
@@ -2397,24 +2418,36 @@ export type Database = {
       tenants: {
         Row: {
           created_at: string
+          default_product: string | null
+          enable_silver: boolean | null
+          enabled_products: string | null
           id: string
           is_active: boolean
           name: string
           plan: string
+          settings_json: Json | null
         }
         Insert: {
           created_at?: string
+          default_product?: string | null
+          enable_silver?: boolean | null
+          enabled_products?: string | null
           id?: string
           is_active?: boolean
           name: string
           plan?: string
+          settings_json?: Json | null
         }
         Update: {
           created_at?: string
+          default_product?: string | null
+          enable_silver?: boolean | null
+          enabled_products?: string | null
           id?: string
           is_active?: boolean
           name?: string
           plan?: string
+          settings_json?: Json | null
         }
         Relationships: []
       }
@@ -2995,6 +3028,7 @@ export type Database = {
         Args: { p_prefix: string; p_tenant_id: string }
         Returns: string
       }
+      get_enabled_products: { Args: never; Returns: string }
       get_user_tenant_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
