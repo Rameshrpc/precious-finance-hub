@@ -64,4 +64,5 @@ export const ROLE_LABELS: Record<string, string> = {
   tenant_admin: "Tenant Admin",
   manager: "Branch Manager",
   staff: "Loan Officer",
+  viewer: "Viewer",
 };

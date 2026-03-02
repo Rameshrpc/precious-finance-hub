@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useItemGroups } from "@/hooks/useMasters";
+import { useTenant } from "@/contexts/TenantContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ItemGroupsTab() {
   const { data, isLoading, upsert, remove, toggle } = useItemGroups();
+  const { enableSilver } = useTenant();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [name, setName] = useState("");
@@ -44,7 +46,9 @@ export default function ItemGroupsTab() {
                 <Label>Metal Type</Label>
                 <RadioGroup value={metalType} onValueChange={setMetalType} className="flex gap-4 mt-1">
                   <div className="flex items-center gap-2"><RadioGroupItem value="gold" id="g" /><Label htmlFor="g">Gold</Label></div>
-                  <div className="flex items-center gap-2"><RadioGroupItem value="silver" id="s" /><Label htmlFor="s">Silver</Label></div>
+                  {enableSilver && (
+                    <div className="flex items-center gap-2"><RadioGroupItem value="silver" id="s" /><Label htmlFor="s">Silver</Label></div>
+                  )}
                 </RadioGroup>
               </div>
               <Button onClick={handleSave} className="w-full bg-accent text-accent-foreground hover:bg-accent/90">Save</Button>
