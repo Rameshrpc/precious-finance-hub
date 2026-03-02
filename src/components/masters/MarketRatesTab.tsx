@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useMarketRates, useUpsertMarketRate } from "@/hooks/useMasters";
+import { useTenant } from "@/contexts/TenantContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,22 +13,23 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 
 export default function MarketRatesTab() {
   const { data, isLoading } = useMarketRates();
+  const { enableSilver } = useTenant();
   const upsertRate = useUpsertMarketRate();
   const today = format(new Date(), "yyyy-MM-dd");
 
   const todayRate = (data || []).find((r: any) => r.rate_date === today);
-  const [gold22k, setGold22k] = useState(todayRate ? String(todayRate.gold_22k) : "");
-  const [gold24k, setGold24k] = useState(todayRate ? String(todayRate.gold_24k) : "");
-  const [silverKg, setSilverKg] = useState(todayRate ? String(todayRate.silver_per_kg) : "");
 
-  // Sync when data loads
-  useState(() => {
+  const [gold22k, setGold22k] = useState("");
+  const [gold24k, setGold24k] = useState("");
+  const [silverKg, setSilverKg] = useState("");
+
+  useEffect(() => {
     if (todayRate) {
       setGold22k(String(todayRate.gold_22k));
       setGold24k(String(todayRate.gold_24k));
       setSilverKg(String(todayRate.silver_per_kg));
     }
-  });
+  }, [todayRate?.gold_22k, todayRate?.gold_24k, todayRate?.silver_per_kg]);
 
   const handleSave = () => {
     upsertRate.mutate({ rate_date: today, gold_22k: parseFloat(gold22k || "0"), gold_24k: parseFloat(gold24k || "0"), silver_per_kg: parseFloat(silverKg || "0") });
@@ -52,7 +54,7 @@ export default function MarketRatesTab() {
       <Card>
         <CardHeader><CardTitle className="text-lg">Today's Rates — {format(new Date(), "dd MMM yyyy")}</CardTitle></CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className={`grid grid-cols-1 gap-4 ${enableSilver ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
             <div>
               <Label>Gold 22K (₹/g)</Label>
               <Input type="number" value={gold22k} onChange={e => setGold22k(e.target.value)} placeholder="6842" />
@@ -61,11 +63,13 @@ export default function MarketRatesTab() {
               <Label>Gold 24K (₹/g)</Label>
               <Input type="number" value={gold24k} onChange={e => setGold24k(e.target.value)} placeholder="7450" />
             </div>
-            <div>
-              <Label>Silver (₹/kg)</Label>
-              <Input type="number" value={silverKg} onChange={e => setSilverKg(e.target.value)} placeholder="92000" />
-              {silverKg && <p className="text-xs text-muted-foreground mt-1">= ₹{silverPerGram}/g</p>}
-            </div>
+            {enableSilver && (
+              <div>
+                <Label>Silver (₹/kg)</Label>
+                <Input type="number" value={silverKg} onChange={e => setSilverKg(e.target.value)} placeholder="92000" />
+                {silverKg && <p className="text-xs text-muted-foreground mt-1">= ₹{silverPerGram}/g</p>}
+              </div>
+            )}
           </div>
           <Button onClick={handleSave} className="mt-4 bg-accent text-accent-foreground hover:bg-accent/90" disabled={upsertRate.isPending}>
             {upsertRate.isPending ? "Saving..." : "Save Rates"}
@@ -97,7 +101,9 @@ export default function MarketRatesTab() {
                 <Tooltip formatter={(v: number) => formatINR(v, 0)} />
                 <Legend />
                 <Line type="monotone" dataKey="gold_22k" name="Gold 22K" stroke="hsl(49 89% 38%)" strokeWidth={2} connectNulls dot={false} />
-                <Line type="monotone" dataKey="silver_per_kg" name="Silver/kg" stroke="hsl(200 5% 53%)" strokeWidth={2} connectNulls dot={false} />
+                {enableSilver && (
+                  <Line type="monotone" dataKey="silver_per_kg" name="Silver/kg" stroke="hsl(200 5% 53%)" strokeWidth={2} connectNulls dot={false} />
+                )}
               </LineChart>
             </ResponsiveContainer>
           </CardContent>

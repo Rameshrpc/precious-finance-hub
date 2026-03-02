@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { usePurities } from "@/hooks/useMasters";
+import { useTenant } from "@/contexts/TenantContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -49,6 +50,7 @@ function PuritySection({ title, metalType, items, onAdd, onEdit, onDelete, onTog
 
 export default function PuritiesTab() {
   const { data, isLoading, upsert, remove, toggle } = usePurities();
+  const { enableSilver } = useTenant();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [name, setName] = useState("");
@@ -78,9 +80,11 @@ export default function PuritiesTab() {
       <PuritySection title="🥇 Gold Purities" metalType="gold" items={goldPurities}
         onAdd={() => openDialog("gold")} onEdit={(r) => openDialog("gold", r)}
         onDelete={remove} onToggle={(id, v) => toggle({ id, is_active: v })} />
-      <PuritySection title="🥈 Silver Purities" metalType="silver" items={silverPurities}
-        onAdd={() => openDialog("silver")} onEdit={(r) => openDialog("silver", r)}
-        onDelete={remove} onToggle={(id, v) => toggle({ id, is_active: v })} />
+      {enableSilver && (
+        <PuritySection title="🥈 Silver Purities" metalType="silver" items={silverPurities}
+          onAdd={() => openDialog("silver")} onEdit={(r) => openDialog("silver", r)}
+          onDelete={remove} onToggle={(id, v) => toggle({ id, is_active: v })} />
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>

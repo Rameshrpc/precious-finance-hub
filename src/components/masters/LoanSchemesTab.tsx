@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLoanSchemes } from "@/hooks/useMasters";
+import { useTenant } from "@/contexts/TenantContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,12 +19,15 @@ const CHARGE_LABELS: Record<string, string> = { GL: "Interest", PO: "Storage Cha
 
 export default function LoanSchemesTab() {
   const { data, isLoading, upsert, remove, toggle } = useLoanSchemes();
+  const { enabledProducts, enableSilver } = useTenant();
   const [filter, setFilter] = useState("All");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<any>({});
 
+  const filterOptions = ["All", ...enabledProducts];
+
   const openAdd = () => {
-    setForm({ product_type: "GL", name: "", rate: "", interest_type: "monthly", tenure_months: 12, overdue_rate: "", grace_period_days: 0, charge_label: "Interest", allowed_metals: ["gold"], gold_ltv_cap: 75, silver_ltv_cap: 50 });
+    setForm({ product_type: enabledProducts[0] || "GL", name: "", rate: "", interest_type: "monthly", tenure_months: 12, overdue_rate: "", grace_period_days: 0, charge_label: CHARGE_LABELS[enabledProducts[0] || "GL"], allowed_metals: ["gold"], gold_ltv_cap: 75, silver_ltv_cap: 50 });
     setOpen(true);
   };
   const openEdit = (row: any) => { setForm({ ...row, allowed_metals: row.allowed_metals || ["gold"] }); setOpen(true); };
@@ -53,9 +57,9 @@ export default function LoanSchemesTab() {
     <div className="mt-4 space-y-4">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex gap-1">
-          {["All", "GL", "PO", "SA"].map((t) => (
+          {filterOptions.map((t) => (
             <Button key={t} size="sm" variant={filter === t ? "default" : "outline"} onClick={() => setFilter(t)}
-              className={filter === t ? "bg-accent text-accent-foreground" : ""}>{t === "All" ? "All" : t}</Button>
+              className={filter === t ? "bg-accent text-accent-foreground" : ""}>{t}</Button>
           ))}
         </div>
         <Button onClick={openAdd} className="bg-accent text-accent-foreground hover:bg-accent/90"><Plus className="h-4 w-4 mr-1" />Add Scheme</Button>
@@ -63,7 +67,7 @@ export default function LoanSchemesTab() {
       <Table>
         <TableHeader><TableRow>
           <TableHead>Name</TableHead><TableHead>Type</TableHead><TableHead>Rate%</TableHead><TableHead>Tenure</TableHead>
-          <TableHead>Gold LTV</TableHead><TableHead>Silver LTV</TableHead><TableHead>Metals</TableHead><TableHead>Status</TableHead><TableHead className="w-24">Actions</TableHead>
+          <TableHead>Gold LTV</TableHead>{enableSilver && <TableHead>Silver LTV</TableHead>}<TableHead>Metals</TableHead><TableHead>Charge</TableHead><TableHead>Status</TableHead><TableHead className="w-24">Actions</TableHead>
         </TableRow></TableHeader>
         <TableBody>
           {filtered.map((row: any) => (
@@ -73,8 +77,9 @@ export default function LoanSchemesTab() {
               <TableCell>{Number(row.rate).toFixed(2)}%</TableCell>
               <TableCell>{row.tenure_months}m</TableCell>
               <TableCell>{Number(row.gold_ltv_cap)}%</TableCell>
-              <TableCell>{Number(row.silver_ltv_cap)}%</TableCell>
-              <TableCell className="flex gap-1">{(row.allowed_metals || []).map((m: string) => <Badge key={m} variant="secondary" className={m === "gold" ? "bg-accent/20 text-accent" : ""}>{m}</Badge>)}</TableCell>
+              {enableSilver && <TableCell>{Number(row.silver_ltv_cap)}%</TableCell>}
+              <TableCell className="flex gap-1 flex-wrap">{(row.allowed_metals || []).map((m: string) => <Badge key={m} variant="secondary" className={m === "gold" ? "bg-accent/20 text-accent" : ""}>{m}</Badge>)}</TableCell>
+              <TableCell className="text-xs text-muted-foreground">{row.charge_label}</TableCell>
               <TableCell><Switch checked={row.is_active} onCheckedChange={(v) => toggle({ id: row.id, is_active: v })} /></TableCell>
               <TableCell>
                 <div className="flex gap-1">
@@ -90,7 +95,7 @@ export default function LoanSchemesTab() {
               </TableCell>
             </TableRow>
           ))}
-          {filtered.length === 0 && <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">No schemes yet</TableCell></TableRow>}
+          {filtered.length === 0 && <TableRow><TableCell colSpan={enableSilver ? 10 : 9} className="text-center text-muted-foreground py-8">No schemes yet</TableCell></TableRow>}
         </TableBody>
       </Table>
 
@@ -102,7 +107,11 @@ export default function LoanSchemesTab() {
               <Label>Product Type</Label>
               <Select value={form.product_type} onValueChange={(v) => setField("product_type", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="GL">Gold Loan</SelectItem><SelectItem value="PO">Purchase Order</SelectItem><SelectItem value="SA">Sale Agreement</SelectItem></SelectContent>
+                <SelectContent>
+                  {enabledProducts.includes("GL") && <SelectItem value="GL">Gold Loan</SelectItem>}
+                  {enabledProducts.includes("PO") && <SelectItem value="PO">Purchase Order</SelectItem>}
+                  {enabledProducts.includes("SA") && <SelectItem value="SA">Sale Agreement</SelectItem>}
+                </SelectContent>
               </Select>
             </div>
             <div><Label>Name</Label><Input value={form.name || ""} onChange={e => setField("name", e.target.value)} /></div>
@@ -126,17 +135,21 @@ export default function LoanSchemesTab() {
               <Label>Allowed Metals</Label>
               <div className="flex gap-4 mt-1">
                 <label className="flex items-center gap-2"><Checkbox checked={(form.allowed_metals || []).includes("gold")} onCheckedChange={() => toggleMetal("gold")} />Gold</label>
-                <label className="flex items-center gap-2"><Checkbox checked={(form.allowed_metals || []).includes("silver")} onCheckedChange={() => toggleMetal("silver")} />Silver</label>
+                {enableSilver && (
+                  <label className="flex items-center gap-2"><Checkbox checked={(form.allowed_metals || []).includes("silver")} onCheckedChange={() => toggleMetal("silver")} />Silver</label>
+                )}
               </div>
             </div>
             <div>
               <Label>Gold LTV Cap: {form.gold_ltv_cap}%</Label>
               <Slider min={40} max={85} step={1} value={[form.gold_ltv_cap || 75]} onValueChange={([v]) => setField("gold_ltv_cap", v)} className="mt-2" />
             </div>
-            <div>
-              <Label>Silver LTV Cap: {form.silver_ltv_cap}%</Label>
-              <Slider min={30} max={70} step={1} value={[form.silver_ltv_cap || 50]} onValueChange={([v]) => setField("silver_ltv_cap", v)} className="mt-2" />
-            </div>
+            {enableSilver && (
+              <div>
+                <Label>Silver LTV Cap: {form.silver_ltv_cap}%</Label>
+                <Slider min={30} max={70} step={1} value={[form.silver_ltv_cap || 50]} onValueChange={([v]) => setField("silver_ltv_cap", v)} className="mt-2" />
+              </div>
+            )}
             <Button onClick={handleSave} className="w-full bg-accent text-accent-foreground hover:bg-accent/90">Save</Button>
           </div>
         </DialogContent>
