@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { Bell, Check, AlertTriangle, Clock, Shield, Phone, Settings } from "lucide-react";
+import { Bell, Check, CheckCheck, AlertTriangle, Clock, Shield, Phone, Settings, Gavel, Landmark, FileText } from "lucide-react";
 
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
   approval: Shield,
@@ -21,6 +21,10 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
   maturity: Clock,
   collection: Phone,
   system: Settings,
+  auction: Gavel,
+  disbursement: Landmark,
+  application: FileText,
+  closure: Check,
 };
 
 const CATEGORY_ROUTES: Record<string, string> = {
@@ -29,6 +33,10 @@ const CATEGORY_ROUTES: Record<string, string> = {
   maturity: "/transactions",
   collection: "/collection/queue",
   system: "/settings",
+  auction: "/auction",
+  disbursement: "/transactions",
+  application: "/transactions/los",
+  closure: "/transactions",
 };
 
 export default function NotificationCenter() {
@@ -41,17 +49,39 @@ export default function NotificationCenter() {
     enabled: !!user?.id,
     queryFn: async () => {
       const { data } = await supabase.from("notifications").select("*")
-        .eq("user_id", user!.id).order("created_at", { ascending: false }).limit(30);
+        .eq("user_id", user!.id).order("created_at", { ascending: false }).limit(10);
       return data || [];
     },
     refetchInterval: 30000,
   });
 
+  // Realtime subscription for live updates
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel("notifications-realtime")
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "notifications",
+        filter: `user_id=eq.${user.id}`,
+      }, () => {
+        qc.invalidateQueries({ queryKey: ["notifications"] });
+        qc.invalidateQueries({ queryKey: ["all-notifications"] });
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id, qc]);
+
   const markRead = useMutation({
     mutationFn: async (id: string) => {
       await supabase.from("notifications").update({ is_read: true }).eq("id", id);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+      qc.invalidateQueries({ queryKey: ["all-notifications"] });
+    },
   });
 
   const markAllRead = useMutation({
@@ -59,7 +89,10 @@ export default function NotificationCenter() {
       await supabase.from("notifications").update({ is_read: true })
         .eq("user_id", user!.id).eq("is_read", false);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+      qc.invalidateQueries({ queryKey: ["all-notifications"] });
+    },
   });
 
   const all = notifications || [];
@@ -67,8 +100,12 @@ export default function NotificationCenter() {
 
   const handleClick = (n: any) => {
     if (!n.is_read) markRead.mutate(n.id);
-    const route = CATEGORY_ROUTES[n.category] || "/dashboard";
-    navigate(n.entity_id ? `${route}/${n.entity_id}` : route);
+    if (n.entity_id && n.entity_type === "loan") {
+      navigate(`/transactions/${n.entity_id}`);
+    } else {
+      const route = CATEGORY_ROUTES[n.category] || "/dashboard";
+      navigate(route);
+    }
   };
 
   return (
@@ -88,7 +125,7 @@ export default function NotificationCenter() {
           <p className="text-sm font-medium">Notifications</p>
           {unreadCount > 0 && (
             <Button variant="ghost" size="sm" className="text-[10px] h-6" onClick={() => markAllRead.mutate()}>
-              <Check className="h-3 w-3 mr-1" /> Mark all read
+              <CheckCheck className="h-3 w-3 mr-1" /> Mark all read
             </Button>
           )}
         </div>
@@ -99,17 +136,23 @@ export default function NotificationCenter() {
             const Icon = CATEGORY_ICONS[n.category] || Bell;
             return (
               <DropdownMenuItem key={n.id} className="flex items-start gap-2 py-2.5 cursor-pointer" onClick={() => handleClick(n)}>
-                <Icon className={`h-4 w-4 shrink-0 mt-0.5 ${n.is_read ? "text-muted-foreground" : "text-primary"}`} />
+                <Icon className={`h-4 w-4 shrink-0 mt-0.5 ${n.is_read ? "text-muted-foreground" : "text-accent"}`} />
                 <div className="flex-1 min-w-0">
                   <p className={`text-xs ${n.is_read ? "text-muted-foreground" : "font-medium"}`}>{n.title}</p>
                   {n.body && <p className="text-[10px] text-muted-foreground truncate">{n.body}</p>}
                   <p className="text-[9px] text-muted-foreground mt-0.5">{new Date(n.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</p>
                 </div>
-                {!n.is_read && <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1" />}
+                {!n.is_read && <span className="w-2 h-2 rounded-full bg-accent shrink-0 mt-1" />}
               </DropdownMenuItem>
             );
           })}
         </ScrollArea>
+        <DropdownMenuSeparator />
+        <div className="px-3 py-2">
+          <Button variant="ghost" size="sm" className="w-full text-xs text-accent" onClick={() => navigate("/notifications")}>
+            View all notifications
+          </Button>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );
