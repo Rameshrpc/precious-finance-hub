@@ -2917,6 +2917,7 @@ export type Database = {
         Row: {
           branch_id: string | null
           created_at: string
+          display_name: string | null
           id: string
           phone: string
           qr_code: string | null
@@ -2928,6 +2929,7 @@ export type Database = {
         Insert: {
           branch_id?: string | null
           created_at?: string
+          display_name?: string | null
           id?: string
           phone: string
           qr_code?: string | null
@@ -2939,6 +2941,7 @@ export type Database = {
         Update: {
           branch_id?: string | null
           created_at?: string
+          display_name?: string | null
           id?: string
           phone?: string
           qr_code?: string | null
