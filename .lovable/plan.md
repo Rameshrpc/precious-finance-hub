@@ -1,40 +1,84 @@
 
 
-## Problem: Login Spinner Never Resolves
+# WAHA Plus Integration Plan
 
-The login API call succeeds (HTTP 200), profile and roles data exist in the database, and RLS policies are correct. The issue is a **deadlock in the `useAuth` hook**.
+## Current State
 
-### Root Cause
+You already have the scaffolding in place:
+- **Edge Functions**: `waha-session` (session management + send) and `waha-webhook` (incoming message handling)
+- **UI**: `WhatsAppInboxPage` with conversation list, chat view, bot toggle, template picker
+- **DB Tables**: `wa_sessions`, `wa_conversations`, `wa_messages`, `wa_templates` exist
 
-In `src/hooks/useAuth.ts`, the `onAuthStateChange` callback performs `await` calls back to Supabase (`profiles` and `user_roles` queries). The Supabase JS client internally locks during auth state change processing, so making additional Supabase requests inside the callback causes it to hang indefinitely. The `loading` state never becomes `false`, so `ProtectedRoute` shows the spinner forever.
+**What's missing**: WAHA Plus API key authentication, secrets configuration, actual message sending from the UI wired through the edge function, and the webhook URL isn't configured to point back to Supabase.
 
-### Fix
+---
 
-Refactor `useAuth.ts` to **defer the profile/roles fetch outside the callback**:
+## Plan
 
-1. **In `onAuthStateChange`**: Only capture the `session.user` synchronously. Do not `await` any Supabase queries.
-2. **Use a separate `useEffect`** that watches the `user` state and fetches `profiles` + `user_roles` when a user is present.
-3. This breaks the deadlock because the Supabase queries run after the auth state change callback has already returned.
+### 1. Add Supabase Secrets for WAHA Plus
 
-### Changes
+Store two secrets:
+- `WAHA_API_URL` — your WAHA Plus instance URL (e.g. `https://waha.yourdomain.com`)
+- `WAHA_API_KEY` — the API key you set in `WHATSAPP_API_KEY` when starting the Docker container
 
-**File: `src/hooks/useAuth.ts`**
-- Remove the `await Promise.all(...)` from inside `onAuthStateChange`
-- Add a second `useEffect` that triggers profile/roles fetch when `user` changes
-- Set `loading: false` only after both the auth state and profile data are resolved
+These will be requested via the secrets tool so you can paste the values securely.
 
+### 2. Update `waha-session` Edge Function for Plus API
+
+- Add `X-Api-Key` header to **all** WAHA API calls (required by WAHA Plus)
+- Read key from `Deno.env.get("WAHA_API_KEY")`
+- Update session start payload to include WAHA Plus config (engine, webhook URL pointing to `waha-webhook`)
+- Add a `qr` action to fetch QR code image for pairing
+- When starting a session, auto-configure the webhook URL to `https://oqyehjqduvnrvuckzqer.supabase.co/functions/v1/waha-webhook`
+
+### 3. Update `waha-webhook` Edge Function for Plus API
+
+- Add `X-Api-Key` header when sending bot replies via WAHA
+- Handle WAHA Plus webhook event format (may differ slightly from core)
+- Add `message.ack` event handling for delivery status tracking
+
+### 4. Wire UI to Edge Functions
+
+Update `WhatsAppInboxPage` to:
+- Call `waha-session` edge function with `action: "send"` when user sends a message (currently only saves to DB, doesn't actually send via WhatsApp)
+- Add a **Session Management** section/page where admins can start/stop WAHA sessions and scan QR codes
+- Show connection status indicator in the chat header
+
+### 5. Session Management UI
+
+Add a settings panel (accessible from WhatsApp Inbox or Settings) to:
+- Start a new WAHA session (shows QR code for WhatsApp Web pairing)
+- View session status (connected/disconnected)
+- Stop/restart sessions
+- Display the linked phone number
+
+---
+
+## Technical Details
+
+**WAHA Plus API Key Header** — Every request to the WAHA Plus API must include:
 ```
-// Pseudostructure:
-onAuthStateChange((_event, session) => {
-  setUser(session?.user ?? null);  // synchronous, no await
-  if (!session?.user) { setProfile(null); setRoles([]); setLoading(false); }
-});
-
-useEffect(() => {
-  if (!user) return;
-  // fetch profiles + user_roles here, then setLoading(false)
-}, [user]);
+X-Api-Key: <your-api-key>
 ```
 
-This is a single-file fix in `useAuth.ts`.
+**Webhook auto-configuration** — When starting a session, the edge function will configure the webhook URL so WAHA pushes incoming messages to:
+```
+https://oqyehjqduvnrvuckzqer.supabase.co/functions/v1/waha-webhook
+```
+
+**Message send flow**:
+```text
+User types message → UI calls waha-session (action: send)
+  → Edge fn saves to wa_messages
+  → Edge fn calls WAHA Plus /api/sendText with X-Api-Key
+  → WhatsApp delivers message
+```
+
+**Incoming message flow**:
+```text
+WhatsApp message → WAHA Plus → POST to waha-webhook
+  → Edge fn saves to wa_messages + wa_conversations
+  → Bot auto-reply if enabled
+  → UI polls/refreshes via react-query
+```
 
